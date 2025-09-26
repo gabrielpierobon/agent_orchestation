@@ -1,42 +1,66 @@
-# ACP (Agent Communication Protocol) Proof of Concept
+# Multi-Agent Orchestrator Demo
 
 ## Overview
 
-This is a demonstration implementation of the Agent Communication Protocol (ACP) - an open standard for AI agent communication that enables autonomous agents from different platforms to discover and collaborate with each other dynamically without central orchestration.
+This is a comprehensive demonstration of multi-agent orchestration that showcases how AI agents from different platforms can collaborate seamlessly to accomplish complex tasks. The project demonstrates three different orchestration approaches:
 
-## Why ACP?
+1. **Basic ACP Implementation** (`acp_poc.py`) - 2-agent n8n workflow orchestration
+2. **Advanced Multi-Platform Orchestration** (`multi_agent_orchestrator.py`) - 3-agent system combining n8n and Azure AI
+3. **Interactive Frontend Demo** (`agent_orchestrator_demo.html`) - Visual interface for orchestration workflows
 
-ACP provides the best solution for multi-platform agent orchestration because it acts as a universal translation layer that enables agents built on completely different platforms (AWS Bedrock, Salesforce Agentforce, SAP Joule, etc.) to discover and communicate with each other directly without requiring custom integrations for each platform combination. Unlike traditional orchestration approaches that force all communication through a central hub with platform-specific connectors, ACP's HTTP-based protocol allows agents to find each other dynamically based on capabilities and collaborate as autonomous peers.
+## Why Multi-Agent Orchestration?
 
-## Architecture
+Multi-agent orchestration enables organizations to leverage specialized AI agents from different platforms (n8n, Azure AI Foundry, AWS Bedrock, Salesforce Agentforce, etc.) without being locked into a single vendor ecosystem. This approach provides:
+
+- **Platform Flexibility**: Use the best agent for each specific task
+- **Scalability**: Add new agents without restructuring existing workflows
+- **Resilience**: Distribute workloads across multiple platforms
+- **Cost Optimization**: Choose cost-effective platforms for different capabilities
+
+## System Architecture
+
+### 3-Agent Energy Consultation Workflow
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Agent A       │    │   ACP Server    │    │   Agent B       │
-│  (Salesforce)   │◄──►│                 │◄──►│   (SAP ERP)     │
-└─────────────────┘    │  Agent Registry │    └─────────────────┘
-                       │  Discovery      │    
-┌─────────────────┐    │  Message Router │    ┌─────────────────┐
-│   Agent C       │◄──►│                 │◄──►│   Agent D       │
-│  (AWS Bedrock)  │    └─────────────────┘    │   (n8n Flow)    │
-└─────────────────┘                           └─────────────────┘
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│   STEP 1: n8n      │    │   STEP 2: Azure AI  │    │   STEP 3: n8n      │
+│ Customer Processor  │───►│  Energy Consultant  │───►│ Validator Agent     │
+│                     │    │                     │    │                     │
+│ • Data validation   │    │ • GPT-4 analysis    │    │ • Compliance check  │
+│ • Insight extraction│    │ • Personalized recs │    │ • Risk assessment   │
+│ • Structure prep    │    │ • Savings estimates │    │ • Final approval    │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
 ```
 
 ### Key Components:
 
-- **ACP Server**: Central HTTP-based registry and message routing service
-- **Agent Registry**: Database of available agents, their capabilities, and endpoints
-- **Discovery Service**: Allows agents to find other agents based on capabilities
-- **Direct Communication**: Agents communicate peer-to-peer via HTTP REST calls
+- **Multi-Agent Registry**: Manages agent registration and capability discovery
+- **Orchestration Engine**: Coordinates workflows across different agent platforms
+- **n8n Integration**: Webhook-based communication with n8n workflow agents
+- **Azure AI Integration**: Direct API communication with Azure AI Foundry agents
+- **Interactive Frontend**: Real-time visualization of orchestration workflows
 
 ## Features Demonstrated
 
-✅ **Agent Registration**: Agents register themselves with capabilities and webhook URLs  
-✅ **Dynamic Discovery**: Find agents based on required capabilities  
-✅ **Single-Agent Orchestration**: Route tasks to appropriate agents  
-✅ **Multi-Agent Collaboration**: Coordinate complex workflows across multiple agents  
-✅ **Direct Agent Communication**: Agents call each other without central orchestration  
-✅ **Platform Agnostic**: Works with any agent that can receive HTTP webhooks  
+### Core Orchestration Features
+✅ **Multi-Platform Integration**: n8n workflows + Azure AI Foundry agents  
+✅ **Sequential Workflow**: 3-step energy consultation process  
+✅ **Agent Registry**: Dynamic agent registration and capability discovery  
+✅ **Real-time Coordination**: Live status updates and progress tracking  
+✅ **Error Handling**: Comprehensive error handling and recovery  
+
+### Frontend Demo Features
+✅ **Interactive Task Visualization**: Clean task list with real-time status updates  
+✅ **Agent Management**: Visual agent registry with registration simulation  
+✅ **Live Progress Tracking**: Animated task progression with status indicators  
+✅ **Results Export**: JSON export functionality for orchestration results  
+✅ **Smart Validation Summary**: Intelligent parsing of validation results  
+
+### Technical Features
+✅ **CORS Support**: Full frontend-backend integration  
+✅ **Webhook Integration**: n8n workflow agent communication  
+✅ **Azure AI API**: Direct integration with Azure AI Foundry Agent Service  
+✅ **Health Monitoring**: System health checks and agent status monitoring  
 
 ## Quick Start
 
@@ -44,6 +68,8 @@ ACP provides the best solution for multi-platform agent orchestration because it
 
 - Python 3.8+
 - Virtual environment (recommended)
+- Azure AI Foundry project (for Azure AI agent integration)
+- n8n instance with webhook endpoints (for n8n agent integration)
 
 ### Installation
 
@@ -69,24 +95,42 @@ pip install -r requirements.txt
 
 ### Configuration
 
-Before running, update the webhook URLs in `acp_poc.py` (lines 229-240) with your actual n8n or agent webhook endpoints:
-
-```python
-# Replace these URLs with your actual agent webhooks
-webhook_url="https://your-n8n-instance.com/webhook/your-webhook-id"
+#### Azure AI Foundry Setup
+Create a `.env` file with your Azure AI Foundry configuration:
+```bash
+AZURE_AI_FOUNDRY_PROJECT_ENDPOINT=https://your-ai-service.services.ai.azure.com/api/projects/your-project-name
 ```
 
-### Run the Server
+#### n8n Webhook Configuration
+Update webhook URLs in the orchestrator files with your actual n8n webhook endpoints:
+- Customer processing webhook
+- Validation webhook
 
+### Running the Demo
+
+#### Option 1: Basic ACP Demo (2 agents)
 ```bash
 python acp_poc.py
 ```
 
-Server starts on `http://localhost:8080`
+#### Option 2: Advanced Multi-Agent Demo (3 agents)
+```bash
+python multi_agent_orchestrator.py
+```
+
+#### Option 3: Interactive Frontend Demo
+1. Start the orchestrator server:
+```bash
+python multi_agent_orchestrator.py
+```
+
+2. Open `agent_orchestrator_demo.html` in your browser
+
+Server runs on `http://localhost:8080`
 
 ## API Endpoints
 
-### Standard ACP Endpoints
+### Basic ACP Server (`acp_poc.py`)
 
 #### Register Agent
 ```bash
@@ -97,25 +141,6 @@ Content-Type: application/json
   "agent_id": "my-agent",
   "capabilities": ["data_processing", "analysis"],
   "webhook_url": "https://my-agent.com/webhook"
-}
-```
-
-#### Discover Agents
-```bash
-GET /agents/discover/{capability}
-
-# Example
-curl http://localhost:8080/agents/discover/customer_processing
-```
-
-#### Single-Agent Orchestration
-```bash
-POST /orchestrate
-Content-Type: application/json
-
-{
-  "task": "process customer data",
-  "data": {"customer_id": "12345"}
 }
 ```
 
@@ -130,145 +155,262 @@ Content-Type: application/json
 }
 ```
 
-## Example Usage Scenarios
+### Advanced Multi-Agent Server (`multi_agent_orchestrator.py`)
 
-### 1. Customer Data Processing (Single Agent)
+#### Register Multi-Platform Agent
 ```bash
-curl -X POST http://localhost:8080/orchestrate \
-  -H "Content-Type: application/json" \
-  -d '{"task": "process customer data", "data": {"customer_id": "12345"}}'
-```
+POST /agents/register
+Content-Type: application/json
 
-**ACP Flow:**
-1. Server analyzes task: "customer" → needs `customer_processing` capability
-2. Discovery: Finds agents with `customer_processing` capability
-3. Routes to first available agent
-4. Agent processes request and returns result
-
-### 2. Multi-Agent Workflow (Process + Validate)
-```bash
-curl -X POST http://localhost:8080/orchestrate-multi \
-  -H "Content-Type: application/json" \
-  -d '{"task": "process and validate customer", "data": {"customer_id": "12345"}}'
-```
-
-**ACP Flow:**
-1. **Step 1**: Route to `customer_processing` agent → Process data
-2. **Step 2**: Route to `data_validation` agent → Validate processed data
-3. **Result**: Combined workflow with results from both agents
-
-### 3. Enterprise Scenario: Quarterly Report Generation
-
-**Scenario**: Generate investor relations report using data from multiple enterprise systems
-
-**Agents Involved:**
-- **SAP Agent**: Provides financial data (`quarterly_revenue`, `operational_costs`)
-- **Salesforce Agent**: Provides customer metrics (`customer_metrics`, `pipeline_data`)  
-- **IR Agent**: Generates professional reports (`report_generation`)
-
-**ACP Workflow:**
-1. IR Agent discovers: "Who can provide revenue data?" → Finds SAP Agent
-2. IR Agent → SAP Agent: "Get Q4 2024 revenue breakdown"
-3. IR Agent discovers: "Who has customer data?" → Finds Salesforce Agent  
-4. IR Agent → Salesforce Agent: "Get customer acquisition metrics"
-5. IR Agent combines data → Generates comprehensive Q4 report
-
-## Extending to Enterprise Platforms
-
-This demo shows the foundation for integrating with enterprise agent platforms:
-
-### Salesforce Agentforce Integration
-- **Current**: n8n webhook agents
-- **Enterprise**: Salesforce Agent API wrapper
-- **ACP Translation**: HTTP messages ↔ Salesforce Agent API calls
-
-### SAP Joule Integration  
-- **Current**: n8n webhook agents
-- **Enterprise**: SAP MCP/BTP integration
-- **ACP Translation**: HTTP messages ↔ SAP Joule API calls
-
-### AWS Bedrock AgentCore Integration
-- **Current**: n8n webhook agents  
-- **Enterprise**: InvokeAgentRuntime API wrapper
-- **ACP Translation**: HTTP messages ↔ AWS Bedrock API calls
-
-## ACP vs Other Protocols
-
-| Feature | ACP | A2A | MCP |
-|---------|-----|-----|-----|
-| **Governance** | Open standard (Linux Foundation) | Google-led consortium | Anthropic-led |
-| **Integration** | Standard HTTP (no SDK required) | Platform-specific | JSON-RPC based |
-| **Discovery** | Offline capability-based | Online registry | Limited discovery |
-| **Architecture** | Peer-to-peer | Hub-and-spoke | Client-server |
-| **Enterprise** | Framework agnostic | Vendor ecosystem | Tool-specific |
-
-## Development Roadmap
-
-### Phase 1: Foundation (Current)
-- [x] Basic ACP server implementation
-- [x] Agent registry and discovery
-- [x] Single and multi-agent orchestration
-- [x] n8n webhook integration
-
-### Phase 2: Enterprise Integration
-- [ ] Salesforce Agentforce wrapper
-- [ ] SAP Joule/MCP integration  
-- [ ] AWS Bedrock AgentCore wrapper
-- [ ] Authentication and security layer
-
-### Phase 3: Advanced Features
-- [ ] Agent health monitoring
-- [ ] Load balancing and failover
-- [ ] Workflow orchestration (Airflow integration)
-- [ ] Advanced discovery algorithms
-- [ ] Performance monitoring and metrics
-
-## Configuration
-
-### Environment Variables
-```bash
-# Server configuration
-ACP_SERVER_PORT=8080
-ACP_SERVER_HOST=0.0.0.0
-
-# Agent timeouts
-ACP_AGENT_TIMEOUT=30
-ACP_DISCOVERY_TIMEOUT=5
-
-# Security (future)
-ACP_AUTH_ENABLED=false
-ACP_API_KEY=""
-```
-
-### Agent Capability Mapping
-The system uses keyword-to-capability mapping for task routing:
-
-```python
-capability_map = {
-    "customer": "customer_processing",
-    "data": "data_analysis", 
-    "process": "data_processing",
-    "invoice": "invoice_processing"
+{
+  "agent_id": "azure-ai-consultant",
+  "agent_type": "azure_ai",
+  "capabilities": ["energy_consultation", "customer_service"],
+  "config": {
+    "agent_id": "asst_aq7lhFm8W8ldxwte9pynGlsk",
+    "model": "gpt-4o"
+  }
 }
 ```
 
-Add new mappings to handle different task types.
+#### Energy Consultation Orchestration
+```bash
+POST /orchestrate-energy
+Content-Type: application/json
+
+{
+  "task": "energy efficiency consultation",
+  "data": {
+    "customer_id": "12345",
+    "inquiry": "I want to reduce my electricity bill",
+    "home_type": "apartment",
+    "current_bill": 150
+  }
+}
+```
+
+#### Health Check
+```bash
+GET /health
+
+# Response
+{
+  "status": "healthy",
+  "agents_registered": 3,
+  "azure_ai_ready": true
+}
+```
+
+## Demo Scenarios
+
+### 1. Energy Consultation Workflow (3-Agent Orchestration)
+
+**Use Case**: Customer wants to reduce their electricity bill
+
+```bash
+curl -X POST http://localhost:8080/orchestrate-energy \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "energy efficiency consultation",
+    "data": {
+      "customer_id": "12345",
+      "inquiry": "I want to reduce my electricity bill",
+      "home_type": "apartment",
+      "current_bill": 150
+    }
+  }'
+```
+
+**Orchestration Flow:**
+1. **Step 1**: n8n Customer Processor
+   - Validates customer input
+   - Extracts insights from inquiry
+   - Prepares structured data for AI analysis
+
+2. **Step 2**: Azure AI Energy Consultant
+   - Analyzes customer profile with GPT-4
+   - Generates personalized energy efficiency recommendations
+   - Estimates potential savings
+
+3. **Step 3**: n8n Validation Agent
+   - Validates recommendations for compliance
+   - Performs risk assessment
+   - Provides final approval status
+
+**Expected Result:**
+- Comprehensive energy consultation report
+- Personalized recommendations (community solar, energy retrofits, etc.)
+- Estimated savings: $7.50 - $37.50 per month
+- Compliance validation with risk assessment
+
+### 2. Interactive Frontend Demo
+
+**Use Case**: Visual demonstration of multi-agent orchestration
+
+**Features:**
+- Real-time task progression visualization
+- Agent registry management
+- Live status updates and animations
+- Results export functionality
+- Validation summary with intelligent parsing
+
+**Access**: Open `agent_orchestrator_demo.html` in your browser while the server is running
+
+## File Structure
+
+```
+agent_orchestation/
+├── README.md                           # This documentation
+├── requirements.txt                    # Python dependencies
+├── .env                               # Azure AI configuration (create this)
+│
+├── acp_poc.py                         # Basic 2-agent ACP implementation
+├── multi_agent_orchestrator.py       # Advanced 3-agent orchestrator
+├── azure_ai_foundry_client.py        # Azure AI Foundry integration
+├── agent_orchestrator_demo.html      # Interactive frontend demo
+│
+└── venv/                              # Virtual environment (created by you)
+```
+
+## Key Technologies
+
+### Backend Technologies
+- **Python Flask**: Web server and API endpoints
+- **Azure AI Foundry**: GPT-4 powered energy consultation agent
+- **n8n Integration**: Webhook-based workflow agents
+- **CORS Support**: Cross-origin resource sharing for frontend integration
+
+### Frontend Technologies
+- **HTML/CSS/JavaScript**: Interactive demo interface
+- **Real-time Updates**: Live task progression and status updates
+- **JSON Export**: Results download functionality
+- **Responsive Design**: Clean, professional UI with animations
+
+### Integration Patterns
+- **Webhook Communication**: n8n agent integration
+- **REST API**: Azure AI Foundry agent communication
+- **Sequential Orchestration**: Step-by-step workflow coordination
+- **Error Handling**: Comprehensive error recovery and reporting
+
+## Development Roadmap
+
+### Phase 1: Foundation ✅ (Completed)
+- [x] Basic ACP server implementation (`acp_poc.py`)
+- [x] Agent registry and discovery
+- [x] Multi-agent orchestration (2-agent workflow)
+- [x] n8n webhook integration
+
+### Phase 2: Advanced Multi-Platform ✅ (Completed)
+- [x] 3-agent orchestration system (`multi_agent_orchestrator.py`)
+- [x] Azure AI Foundry integration (`azure_ai_foundry_client.py`)
+- [x] Interactive frontend demo (`agent_orchestrator_demo.html`)
+- [x] Real-time progress tracking and visualization
+- [x] CORS support and error handling
+- [x] Results export functionality
+- [x] Smart validation parsing
+
+### Phase 3: Enterprise Extensions 🚧 (Future)
+- [ ] Salesforce Agentforce integration
+- [ ] AWS Bedrock AgentCore wrapper
+- [ ] Microsoft Copilot Studio integration
+- [ ] Authentication and security layer
+- [ ] Agent health monitoring and failover
+- [ ] Performance metrics and analytics
+
+## Configuration
+
+### Environment Variables (.env file)
+```bash
+# Azure AI Foundry Configuration (Required)
+AZURE_AI_FOUNDRY_PROJECT_ENDPOINT=https://your-ai-service.services.ai.azure.com/api/projects/your-project-name
+
+# Azure Authentication (Optional - uses DefaultAzureCredential by default)
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+AZURE_TENANT_ID=your-tenant-id
+
+# Server Configuration (Optional)
+FLASK_HOST=0.0.0.0
+FLASK_PORT=8080
+FLASK_DEBUG=true
+```
+
+### Agent Configuration
+Update webhook URLs and agent IDs in the orchestrator files:
+
+**multi_agent_orchestrator.py:**
+```python
+# n8n Customer Processor
+webhook_url="https://your-n8n-instance.com/webhook/customer-processor"
+
+# Azure AI Agent
+agent_id="asst_your_agent_id"
+
+# n8n Validator
+webhook_url="https://your-n8n-instance.com/webhook/validator"
+```
+
+### Dependencies (requirements.txt)
+```
+flask==3.0.0
+flask-cors==4.0.0
+requests==2.31.0
+azure-identity==1.15.0
+python-dotenv==1.0.0
+```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Agent not found**: Check if agent is registered and webhook URL is accessible
-2. **Timeout errors**: Verify agent webhook responds within 30 seconds
-3. **Discovery fails**: Ensure agent capabilities match required capabilities exactly
+#### Azure AI Integration
+1. **Authentication Failed**: 
+   - Run `az login` to authenticate with Azure CLI
+   - Verify `AZURE_AI_FOUNDRY_PROJECT_ENDPOINT` is correct
+   - Check Azure AI Developer role permissions
+
+2. **Agent Not Found**: 
+   - Verify agent ID `asst_aq7lhFm8W8ldxwte9pynGlsk` exists
+   - Check agent is in the correct Azure AI project
+
+#### n8n Integration
+1. **Webhook Timeout**: 
+   - Verify n8n webhook URLs are accessible
+   - Check webhook responds within 30 seconds
+   - Test webhooks independently with curl
+
+2. **CORS Errors**: 
+   - Ensure `flask-cors` is installed
+   - Verify CORS is enabled in the Flask app
+
+#### Frontend Demo
+1. **Cannot Connect to Server**: 
+   - Start `multi_agent_orchestrator.py` first
+   - Check server is running on `http://localhost:8080`
+   - Verify CORS is enabled
+
+2. **Validation Shows 'Failed'**: 
+   - This was fixed in the latest version
+   - Refresh browser and try again
 
 ### Debug Mode
-Enable detailed logging by setting `debug=True` in the Flask app configuration.
+Enable detailed logging:
+```python
+app.run(host='0.0.0.0', port=8080, debug=True)
+```
 
-### Testing Webhooks
-Use tools like ngrok to expose local endpoints for testing:
+### Testing Individual Components
+
+#### Test Azure AI Client
 ```bash
-ngrok http 8080
+python azure_ai_foundry_client.py
+```
+
+#### Test n8n Webhooks
+```bash
+curl -X POST https://your-n8n-webhook-url \
+  -H "Content-Type: application/json" \
+  -d '{"task": "test", "data": {"test": true}}'
 ```
 
 ## Contributing
@@ -283,12 +425,33 @@ ngrok http 8080
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## Demo Results
+
+### Sample Energy Consultation Output
+
+**Customer Input:**
+- Inquiry: "I want to generate solar power electricity"  
+- Home Type: Apartment
+- Current Bill: $150/month
+
+**3-Agent Orchestration Results:**
+1. **Customer Processing**: Identified apartment solar challenges, recommended community solar programs
+2. **AI Consultation**: Generated 5 personalized programs with savings estimates ($7.50-$37.50/month)
+3. **Validation**: Compliance score 78/100, "Needs Review" status, Medium risk level
+
+**Frontend Features Demonstrated:**
+- Real-time task progression with animations
+- Intelligent validation parsing (Fixed "Failed" → "Needs Review")
+- Results export with full orchestration metadata
+- Agent registration simulation
+
 ## References
 
-- [Agent Communication Protocol (ACP) - IBM Research](https://agentcommunicationprotocol.dev)
-- [ACP Specification - Linux Foundation](https://github.com/i-am-bee/acp)
-- [Agent Interoperability Protocols Survey](https://arxiv.org/abs/2505.02279)
+- [Azure AI Foundry Documentation](https://docs.microsoft.com/en-us/azure/ai-services/)
+- [n8n Webhook Integration Guide](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
+- [Flask-CORS Documentation](https://flask-cors.readthedocs.io/)
+- [Multi-Agent Systems Research](https://arxiv.org/abs/2505.02279)
 
 ---
 
-**Built with ❤️ for the future of AI agent orchestration**
+**Built with ❤️ for demonstrating the future of multi-platform AI agent orchestration**

@@ -9,6 +9,7 @@ Then: curl -X POST http://localhost:8080/orchestrate-energy -H "Content-Type: ap
 """
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
 import json
 from typing import Dict, List
@@ -51,6 +52,7 @@ class MultiAgentRegistry:
 class MultiAgentOrchestrator:
     def __init__(self):
         self.app = Flask(__name__)
+        CORS(self.app)  # Enable CORS for all routes
         self.registry = MultiAgentRegistry()
         self.azure_ai_client = None
         self.setup_routes()

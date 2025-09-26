@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Orchestrator Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .panel h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        /* Agent Registry */
+        .agent-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .register-agent-btn {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .register-agent-btn:hover {
+            background: #218838;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .agent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .agent-icon.n8n {
+            background: #ff6d5a;
+        }
+
+        .agent-icon.azure {
+            background: #0078d4;
+        }
+
+        .agent-info h4 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .agent-info p {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .agent-status {
+            margin-left: auto;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            background: #e8f5e8;
+            color: #2d5a2d;
+        }
+
+        /* Task List Visualization */
+        .workflow-tasks {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 4px solid #e0e0e0;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .task-item.pending {
+            border-left-color: #ffc107;
+        }
+
+        .task-item.processing {
+            border-left-color: #17a2b8;
+            animation: pulse 1.5s infinite;
+        }
+
+        .task-item.completed {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .task-item.error {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+
+        @keyframes pulse {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-2px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .task-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .task-item.completed .task-number {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .task-item.processing .task-number {
+            background: linear-gradient(135deg, #17a2b8, #20c997);
+        }
+
+        .task-item.error .task-number {
+            background: linear-gradient(135deg, #dc3545, #c62828);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .task-description {
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .task-agent {
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .task-status {
+            margin-left: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .task-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .task-status.processing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .task-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .workflow-info {
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        /* Control Panel */
+        .control-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .execute-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .execute-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .execute-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-indicator {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-indicator.idle {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .status-indicator.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-indicator.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-indicator.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            grid-column: 1 / -1;
+            min-height: 200px;
+        }
+
+        .result-step {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .result-content {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .json-viewer {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            color: #333;
+        }
+
+        .summary-card {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .summary-card h4 {
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .export-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.8em;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Multi-Agent Orchestrator Server</h1>
+            <p>AI Agent Collaboration Across Different Platforms</p>
+        </div>
+
+        <div class="dashboard">
+            <!-- Agent Registry Panel -->
+            <div class="panel">
+                <h3>🔧 Registered Agents</h3>
+                <div id="agentRegistry">
+                    <div class="agent-item">
+                        <div class="agent-icon n8n">n8n</div>
+                        <div class="agent-info">
+                            <h4>Customer Processor</h4>
+                            <p>Data analysis & processing agent</p>
+                        </div>
+                        <span class="agent-status">Active</span>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-icon azure">Azure</div>
+                        <div class="agent-info">
+                            <h4>Energy Consultant</h4>
+                            <p>AI-powered recommendations agent</p>
+                        </div>
+                        <span class="agent-status">Active</span>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-icon n8n">n8n</div>
+                        <div class="agent-info">
+                            <h4>Validator</h4>
+                            <p>Compliance & validation agent</p>
+                        </div>
+                        <span class="agent-status">Active</span>
+                    </div>
+                </div>
+                <button class="register-agent-btn" onclick="showRegisterModal()">
+                    ➕ Register New Agent
+                </button>
+            </div>
+
+            <!-- Task List Panel -->
+            <div class="panel">
+                <h3>📋 Orchestration Tasks</h3>
+                <div class="workflow-tasks">
+                    <div class="task-item pending" id="task1">
+                        <div class="task-number">1</div>
+                        <div class="task-content">
+                            <div class="task-title">Customer Data Processing</div>
+                            <div class="task-description">Process customer inquiry, validate input data, extract insights, and prepare structured data for AI analysis</div>
+                            <div class="task-agent">👤 Agent: n8n Customer Processor</div>
+                        </div>
+                        <div class="task-status pending">Pending</div>
+                    </div>
+
+                    <div class="task-item pending" id="task2">
+                        <div class="task-number">2</div>
+                        <div class="task-content">
+                            <div class="task-title">Energy Consultation Analysis</div>
+                            <div class="task-description">Use GPT-4 to analyze customer profile and generate personalized energy efficiency recommendations with savings potential</div>
+                            <div class="task-agent">🤖 Agent: Azure AI Energy Consultant</div>
+                        </div>
+                        <div class="task-status pending">Pending</div>
+                    </div>
+
+                    <div class="task-item pending" id="task3">
+                        <div class="task-number">3</div>
+                        <div class="task-content">
+                            <div class="task-title">Compliance Validation</div>
+                            <div class="task-description">Validate AI recommendations for compliance, accuracy, and risk assessment before final approval</div>
+                            <div class="task-agent">✅ Agent: n8n Validator</div>
+                        </div>
+                        <div class="task-status pending">Pending</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-info" id="workflowInfo">
+                    <strong>Workflow Status:</strong> <span id="workflowStatus">Ready to execute - 3 tasks pending</span>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="panel">
+                <h3>🎯 Execute Orchestration</h3>
+                <form class="control-form" id="orchestrationForm">
+                    <div class="form-group">
+                        <label for="customerInquiry">Customer Inquiry:</label>
+                        <input type="text" id="customerInquiry" value="I want to reduce my electricity bill" placeholder="Enter customer inquiry...">
+                    </div>
+                    <div class="form-group">
+                        <label for="homeType">Home Type:</label>
+                        <select id="homeType">
+                            <option value="apartment">Apartment</option>
+                            <option value="house">House</option>
+                            <option value="condo">Condo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentBill">Current Monthly Bill ($):</label>
+                        <input type="number" id="currentBill" value="150" min="0" placeholder="Enter current bill amount">
+                    </div>
+                    <button type="submit" class="execute-btn" id="executeBtn">
+                        🚀 Execute Agent Orchestration
+                    </button>
+                </form>
+                <div class="status-indicator idle" id="statusIndicator">
+                    System Ready
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="panel results-panel hidden" id="resultsPanel">
+            <div class="results-header">
+                <h3>📊 Orchestration Results</h3>
+                <div class="btn-group">
+                    <button class="export-btn" onclick="exportResults()">
+                        💾 Export Results JSON
+                    </button>
+                </div>
+            </div>
+            <div id="resultsContent">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Registration Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="hideRegisterModal()">&times;</span>
+            <h3>🔧 Register New Agent</h3>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="agentId">Agent ID:</label>
+                    <input type="text" id="agentId" placeholder="e.g., my-custom-agent-001" required>
+                </div>
+                <div class="form-group">
+                    <label for="agentType">Agent Type:</label>
+                    <select id="agentType" required>
+                        <option value="">Select Type</option>
+                        <option value="n8n">n8n Workflow</option>
+                        <option value="azure_ai">Azure AI Agent</option>
+                        <option value="custom">Custom API</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="agentCapabilities">Capabilities (comma separated):</label>
+                    <input type="text" id="agentCapabilities" placeholder="e.g., data_processing, analysis" required>
+                </div>
+                <div class="form-group">
+                    <label for="webhookUrl">Webhook URL:</label>
+                    <input type="url" id="webhookUrl" placeholder="https://your-endpoint.com/webhook" required>
+                </div>
+                <button type="submit" class="execute-btn" disabled style="opacity: 0.6;">
+                    🚫 Register Agent (Demo Only)
+                </button>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    <em>Note: This is a demonstration interface. Agent registration is disabled in demo mode.</em>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        
+        class AgentOrchestrator {
+            constructor() {
+                this.isExecuting = false;
+                this.lastResults = null; // Store full results for export
+                this.initializeEventListeners();
+                this.checkSystemHealth();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('orchestrationForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.executeOrchestration();
+                });
+
+                // Add click listeners to task items for info
+                ['task1', 'task2', 'task3'].forEach(taskId => {
+                    document.getElementById(taskId).addEventListener('click', () => {
+                        this.showTaskInfo(taskId);
+                    });
+                });
+            }
+
+            async checkSystemHealth() {
+                try {
+                    const response = await fetch(`${API_BASE}/health`);
+                    const health = await response.json();
+                    
+                    if (health.status === 'healthy') {
+                        this.updateWorkflowStatus('System healthy - All agents ready - 3 tasks pending');
+                    } else {
+                        this.updateWorkflowStatus('System issues detected', 'error');
+                    }
+                } catch (error) {
+                    this.updateWorkflowStatus('Unable to connect to orchestrator', 'error');
+                    console.error('Health check failed:', error);
+                }
+            }
+
+            async executeOrchestration() {
+                if (this.isExecuting) return;
+
+                this.isExecuting = true;
+                this.resetTasks();
+                this.updateExecuteButton(true, 'Executing...');
+                this.updateStatusIndicator('running', 'Orchestration in progress...');
+                this.showResults();
+
+                const payload = {
+                    task: "energy efficiency consultation",
+                    data: {
+                        customer_id: Date.now().toString(),
+                        inquiry: document.getElementById('customerInquiry').value,
+                        home_type: document.getElementById('homeType').value,
+                        current_bill: parseInt(document.getElementById('currentBill').value)
+                    }
+                };
+
+                try {
+                    // Simulate real-time progress
+                    this.simulateProgress();
+
+                    const response = await fetch(`${API_BASE}/orchestrate-energy`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'completed') {
+                        this.handleSuccess(result);
+                    } else {
+                        this.handleError(result.error || 'Unknown error occurred');
+                    }
+
+                } catch (error) {
+                    this.handleError(`Network error: ${error.message}`);
+                } finally {
+                    this.isExecuting = false;
+                    this.updateExecuteButton(false, '🚀 Execute 3-Agent Orchestration');
+                }
+            }
+
+            simulateProgress() {
+                // Task 1: Processing
+                setTimeout(() => {
+                    this.updateTaskStatus('task1', 'processing');
+                    this.updateWorkflowStatus('Task 1: Processing customer data...');
+                }, 500);
+
+                // Task 2: AI Consultation
+                setTimeout(() => {
+                    this.updateTaskStatus('task1', 'completed');
+                    this.updateTaskStatus('task2', 'processing');
+                    this.updateWorkflowStatus('Task 2: Getting AI recommendations...');
+                }, 2000);
+
+                // Task 3: Validation
+                setTimeout(() => {
+                    this.updateTaskStatus('task2', 'completed');
+                    this.updateTaskStatus('task3', 'processing');
+                    this.updateWorkflowStatus('Task 3: Validating recommendations...');
+                }, 4000);
+            }
+
+            handleSuccess(result) {
+                this.lastResults = result; // Store full results for export
+                this.updateTaskStatus('task3', 'completed');
+                this.updateStatusIndicator('success', 'Orchestration completed successfully!');
+                this.updateWorkflowStatus('All tasks completed successfully - 3/3 complete');
+                this.displayResults(result);
+            }
+
+            handleError(error) {
+                this.updateStatusIndicator('error', `Error: ${error}`);
+                this.updateWorkflowStatus('Orchestration failed', 'error');
+                
+                // Mark current processing task as error
+                ['task1', 'task2', 'task3'].forEach(taskId => {
+                    const task = document.getElementById(taskId);
+                    if (task.classList.contains('processing')) {
+                        this.updateTaskStatus(taskId, 'error');
+                    }
+                });
+            }
+
+            displayResults(result) {
+                const resultsContent = document.getElementById('resultsContent');
+                
+                let html = `
+                    <div class="result-step">
+                        <h4>🎯 Task Summary</h4>
+                        <div class="result-content">
+                            <div class="json-viewer">
+Task: ${result.task}
+Workflow: ${result.workflow}
+Final Status: ${result.final_status}
+Agents Used: ${result.agents_used.length}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                if (result.step1_customer_processing) {
+                    html += `
+                        <div class="result-step">
+                            <h4>📋 Step 1: Customer Processing</h4>
+                            <div class="result-content">
+                                <div class="json-viewer">${JSON.stringify(result.step1_customer_processing, null, 2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (result.step2_ai_recommendations) {
+                    html += `
+                        <div class="result-step">
+                            <h4>🤖 Step 2: AI Recommendations</h4>
+                            <div class="result-content">
+                                <div class="json-viewer">${this.formatAIRecommendations(result.step2_ai_recommendations)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (result.step3_validation) {
+                    html += `
+                        <div class="result-step">
+                            <h4>✅ Step 3: Validation</h4>
+                            <div class="result-content">
+                                <div class="json-viewer">${JSON.stringify(result.step3_validation, null, 2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Generate consultation summary from actual validation results
+                if (result.step3_validation) {
+                    const validationResult = result.step3_validation.result || result.step3_validation;
+                    const approvalStatus = validationResult.approval_status;
+                    const complianceScore = validationResult.compliance_score;
+                    const riskLevel = validationResult.risk_level;
+                    
+                    // Determine validation status
+                    let validationStatus = 'Failed';
+                    let statusColor = '#dc3545'; // red
+                    
+                    if (approvalStatus === 'approved' || complianceScore >= 85) {
+                        validationStatus = 'Passed';
+                        statusColor = '#28a745'; // green
+                    } else if (approvalStatus === 'needs_review' || complianceScore >= 70) {
+                        validationStatus = 'Needs Review';
+                        statusColor = '#ffc107'; // yellow
+                    }
+                    
+                    // Extract potential savings from AI recommendations
+                    let estimatedSavings = 'N/A';
+                    if (result.step2_ai_recommendations && result.step2_ai_recommendations.consultation_response) {
+                        const aiText = result.step2_ai_recommendations.consultation_response;
+                        // Look for savings ranges in the AI response
+                        const savingsMatch = aiText.match(/\$(\d+(?:\.\d{2})?)\s*[–-]\s*\$(\d+(?:\.\d{2})?)/);
+                        if (savingsMatch) {
+                            estimatedSavings = `$${savingsMatch[1]} - $${savingsMatch[2]} per month`;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="summary-card" style="background: linear-gradient(45deg, ${statusColor}, ${statusColor}CC);">
+                            <h4>📄 Consultation Summary</h4>
+                            <p><strong>Validation:</strong> ${validationStatus}</p>
+                            <p><strong>Compliance Score:</strong> ${complianceScore}/100</p>
+                            <p><strong>Risk Level:</strong> ${riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)}</p>
+                            <p><strong>Estimated Savings:</strong> ${estimatedSavings}</p>
+                        </div>
+                    `;
+                }
+
+                resultsContent.innerHTML = html;
+            }
+
+            formatAIRecommendations(recommendations) {
+                if (recommendations.consultation_response) {
+                    return recommendations.consultation_response; // Show full response
+                }
+                return JSON.stringify(recommendations, null, 2);
+            }
+
+            showTaskInfo(taskId) {
+                const taskInfo = {
+                    'task1': 'Customer Data Processing: Analyzes customer inquiry, validates input data, and prepares it for AI consultation',
+                    'task2': 'Energy Consultation: Uses AI to analyze customer profile and generate personalized energy efficiency recommendations',
+                    'task3': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
+                };
+                
+                alert(taskInfo[taskId] || 'Task information not available');
+            }
+
+            updateTaskStatus(taskId, status) {
+                const task = document.getElementById(taskId);
+                const statusElement = task.querySelector('.task-status');
+                
+                // Remove all status classes
+                task.classList.remove('pending', 'processing', 'completed', 'error');
+                statusElement.classList.remove('pending', 'processing', 'completed', 'error');
+                
+                // Add new status
+                task.classList.add(status);
+                statusElement.classList.add(status);
+                statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            }
+
+            resetTasks() {
+                ['task1', 'task2', 'task3'].forEach(taskId => {
+                    this.updateTaskStatus(taskId, 'pending');
+                });
+            }
+
+            updateWorkflowStatus(message, type = 'info') {
+                document.getElementById('workflowStatus').textContent = message;
+            }
+
+            updateExecuteButton(disabled, text) {
+                const btn = document.getElementById('executeBtn');
+                btn.disabled = disabled;
+                btn.innerHTML = disabled ? `<span class="loading-spinner"></span> ${text}` : text;
+            }
+
+            updateStatusIndicator(type, message) {
+                const indicator = document.getElementById('statusIndicator');
+                indicator.className = `status-indicator ${type}`;
+                indicator.textContent = message;
+            }
+
+            showResults() {
+                document.getElementById('resultsPanel').classList.remove('hidden');
+            }
+        }
+
+        // Initialize the orchestrator when the page loads
+        let orchestrator;
+        document.addEventListener('DOMContentLoaded', () => {
+            orchestrator = new AgentOrchestrator();
+        });
+
+        // Modal functions
+        function showRegisterModal() {
+            document.getElementById('registerModal').style.display = 'block';
+        }
+
+        function hideRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        // Export functionality
+        function exportResults() {
+            if (!orchestrator || !orchestrator.lastResults) {
+                alert('No results available to export. Please run an orchestration first.');
+                return;
+            }
+
+            const exportData = {
+                export_timestamp: new Date().toISOString(),
+                orchestration_metadata: {
+                    demo_version: "1.0",
+                    agents_count: 3,
+                    workflow_type: "three_agent_energy_consultation"
+                },
+                full_results: orchestrator.lastResults
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `agent_orchestration_results_${Date.now()}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('registerModal');
+            if (event.target == modal) {
+                hideRegisterModal();
+            }
+        }
+    </script>
+</body>
+</html>
