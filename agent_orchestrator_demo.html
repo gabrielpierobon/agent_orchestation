@@ -147,6 +147,10 @@
             background: #ff6d5a;
         }
 
+        .agent-icon.sap {
+            background: #0a6ed1;
+        }
+
         .agent-icon.azure {
             background: #0078d4;
         }
@@ -457,6 +461,163 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Agent Details Modal */
+        .agent-details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .agent-details-content {
+            position: relative;
+            background: white;
+            margin: 30px auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .agent-details-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .agent-details-header .agent-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5em;
+            margin-right: 20px;
+        }
+
+        .agent-details-title h2 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .agent-details-title p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .api-section {
+            margin-bottom: 25px;
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .api-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .api-endpoint {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        .api-endpoint .method {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .api-endpoint .url {
+            color: #8be9fd;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .code-block .key {
+            color: #ff79c6;
+        }
+
+        .code-block .string {
+            color: #f1fa8c;
+        }
+
+        .code-block .number {
+            color: #bd93f9;
+        }
+
+        .code-block .boolean {
+            color: #50fa7b;
+        }
+
+        .info-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .info-badge.capability {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .info-badge.type {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .agent-item {
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .agent-item:hover {
+            background: #eef0ff !important;
+        }
+
         .export-btn {
             background: #17a2b8;
             color: white;
@@ -527,7 +688,7 @@
             <div class="panel">
                 <h3>🔧 Registered Agents</h3>
                 <div id="agentRegistry">
-                    <div class="agent-item">
+                    <div class="agent-item" onclick="showAgentDetails('n8n-customer')">
                         <div class="agent-icon n8n">n8n</div>
                         <div class="agent-info">
                             <h4>Customer Processor</h4>
@@ -535,7 +696,15 @@
                         </div>
                         <span class="agent-status">Active</span>
                     </div>
-                    <div class="agent-item">
+                    <div class="agent-item" onclick="showAgentDetails('sap-ai-core')">
+                        <div class="agent-icon sap">SAP</div>
+                        <div class="agent-info">
+                            <h4>Enterprise Data Enrichment</h4>
+                            <p>SAP AI Core billing & eligibility agent</p>
+                        </div>
+                        <span class="agent-status">Active</span>
+                    </div>
+                    <div class="agent-item" onclick="showAgentDetails('azure-ai')">
                         <div class="agent-icon azure">Azure</div>
                         <div class="agent-info">
                             <h4>Energy Consultant</h4>
@@ -543,7 +712,7 @@
                         </div>
                         <span class="agent-status">Active</span>
                     </div>
-                    <div class="agent-item">
+                    <div class="agent-item" onclick="showAgentDetails('n8n-validator')">
                         <div class="agent-icon n8n">n8n</div>
                         <div class="agent-info">
                             <h4>Validator</h4>
@@ -574,15 +743,25 @@
                     <div class="task-item pending" id="task2">
                         <div class="task-number">2</div>
                         <div class="task-content">
-                            <div class="task-title">Energy Consultation Analysis</div>
-                            <div class="task-description">Use GPT-4 to analyze customer profile and generate personalized energy efficiency recommendations with savings potential</div>
-                            <div class="task-agent">🤖 Agent: Azure AI Energy Consultant</div>
+                            <div class="task-title">Enterprise Data Enrichment</div>
+                            <div class="task-description">Retrieve customer billing history, energy consumption patterns, active contracts, and program eligibility from SAP ERP/CRM systems via AI Core Orchestration v2</div>
+                            <div class="task-agent">🏢 Agent: SAP AI Core Data Enrichment</div>
                         </div>
                         <div class="task-status pending">Pending</div>
                     </div>
 
                     <div class="task-item pending" id="task3">
                         <div class="task-number">3</div>
+                        <div class="task-content">
+                            <div class="task-title">Energy Consultation Analysis</div>
+                            <div class="task-description">Use GPT-4 to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations with savings potential</div>
+                            <div class="task-agent">🤖 Agent: Azure AI Energy Consultant</div>
+                        </div>
+                        <div class="task-status pending">Pending</div>
+                    </div>
+
+                    <div class="task-item pending" id="task4">
+                        <div class="task-number">4</div>
                         <div class="task-content">
                             <div class="task-title">Compliance Validation</div>
                             <div class="task-description">Validate AI recommendations for compliance, accuracy, and risk assessment before final approval</div>
@@ -593,7 +772,7 @@
                 </div>
                 
                 <div class="workflow-info" id="workflowInfo">
-                    <strong>Workflow Status:</strong> <span id="workflowStatus">Ready to execute - 3 tasks pending</span>
+                    <strong>Workflow Status:</strong> <span id="workflowStatus">Ready to execute - 4 tasks pending</span>
                 </div>
             </div>
 
@@ -618,7 +797,7 @@
                         <input type="number" id="currentBill" value="150" min="0" placeholder="Enter current bill amount">
                     </div>
                     <button type="submit" class="execute-btn" id="executeBtn">
-                        🚀 Execute Agent Orchestration
+                        🚀 Execute 4-Agent Orchestration
                     </button>
                 </form>
                 <div class="status-indicator idle" id="statusIndicator">
@@ -680,6 +859,16 @@
         </div>
     </div>
 
+    <!-- Agent Details Modal -->
+    <div class="agent-details-modal" id="agentDetailsModal">
+        <div class="agent-details-content">
+            <span class="close-modal" onclick="hideAgentDetails()">&times;</span>
+            <div id="agentDetailsContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = 'http://localhost:8080';
         
@@ -698,7 +887,7 @@
                 });
 
                 // Add click listeners to task items for info
-                ['task1', 'task2', 'task3'].forEach(taskId => {
+                ['task1', 'task2', 'task3', 'task4'].forEach(taskId => {
                     document.getElementById(taskId).addEventListener('click', () => {
                         this.showTaskInfo(taskId);
                     });
@@ -711,7 +900,7 @@
                     const health = await response.json();
                     
                     if (health.status === 'healthy') {
-                        this.updateWorkflowStatus('System healthy - All agents ready - 3 tasks pending');
+                        this.updateWorkflowStatus('System healthy - All agents ready - 4 tasks pending');
                     } else {
                         this.updateWorkflowStatus('System issues detected', 'error');
                     }
@@ -764,37 +953,44 @@
                     this.handleError(`Network error: ${error.message}`);
                 } finally {
                     this.isExecuting = false;
-                    this.updateExecuteButton(false, '🚀 Execute 3-Agent Orchestration');
+                    this.updateExecuteButton(false, '🚀 Execute 4-Agent Orchestration');
                 }
             }
 
             simulateProgress() {
-                // Task 1: Processing
+                // Task 1: Customer Processing
                 setTimeout(() => {
                     this.updateTaskStatus('task1', 'processing');
                     this.updateWorkflowStatus('Task 1: Processing customer data...');
                 }, 500);
 
-                // Task 2: AI Consultation
+                // Task 2: SAP Enterprise Data Enrichment (realistic 2-4s delay)
                 setTimeout(() => {
                     this.updateTaskStatus('task1', 'completed');
                     this.updateTaskStatus('task2', 'processing');
-                    this.updateWorkflowStatus('Task 2: Getting AI recommendations...');
+                    this.updateWorkflowStatus('Task 2: Retrieving enterprise data from SAP AI Core...');
                 }, 2000);
 
-                // Task 3: Validation
+                // Task 3: Azure AI Consultation
                 setTimeout(() => {
                     this.updateTaskStatus('task2', 'completed');
                     this.updateTaskStatus('task3', 'processing');
-                    this.updateWorkflowStatus('Task 3: Validating recommendations...');
-                }, 4000);
+                    this.updateWorkflowStatus('Task 3: Getting AI recommendations...');
+                }, 5000);  // 2s + 3s (SAP takes 2-4s realistically)
+
+                // Task 4: Validation
+                setTimeout(() => {
+                    this.updateTaskStatus('task3', 'completed');
+                    this.updateTaskStatus('task4', 'processing');
+                    this.updateWorkflowStatus('Task 4: Validating recommendations...');
+                }, 8000);  // Previous + 3s for AI processing
             }
 
             handleSuccess(result) {
                 this.lastResults = result; // Store full results for export
-                this.updateTaskStatus('task3', 'completed');
+                this.updateTaskStatus('task4', 'completed');
                 this.updateStatusIndicator('success', 'Orchestration completed successfully!');
-                this.updateWorkflowStatus('All tasks completed successfully - 3/3 complete');
+                this.updateWorkflowStatus('All tasks completed successfully - 4/4 complete');
                 this.displayResults(result);
             }
 
@@ -803,7 +999,7 @@
                 this.updateWorkflowStatus('Orchestration failed', 'error');
                 
                 // Mark current processing task as error
-                ['task1', 'task2', 'task3'].forEach(taskId => {
+                ['task1', 'task2', 'task3', 'task4'].forEach(taskId => {
                     const task = document.getElementById(taskId);
                     if (task.classList.contains('processing')) {
                         this.updateTaskStatus(taskId, 'error');
@@ -839,31 +1035,42 @@ Agents Used: ${result.agents_used.length}
                     `;
                 }
 
-                if (result.step2_ai_recommendations) {
+                if (result.step2_sap_enrichment) {
                     html += `
                         <div class="result-step">
-                            <h4>🤖 Step 2: AI Recommendations</h4>
+                            <h4>🏢 Step 2: SAP Enterprise Data Enrichment</h4>
                             <div class="result-content">
-                                <div class="json-viewer">${this.formatAIRecommendations(result.step2_ai_recommendations)}</div>
+                                <div class="json-viewer">${JSON.stringify(result.step2_sap_enrichment, null, 2)}</div>
                             </div>
                         </div>
                     `;
                 }
 
-                if (result.step3_validation) {
+                if (result.step3_ai_recommendations) {
                     html += `
                         <div class="result-step">
-                            <h4>✅ Step 3: Validation</h4>
+                            <h4>🤖 Step 3: AI Recommendations</h4>
                             <div class="result-content">
-                                <div class="json-viewer">${JSON.stringify(result.step3_validation, null, 2)}</div>
+                                <div class="json-viewer">${this.formatAIRecommendations(result.step3_ai_recommendations)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (result.step4_validation) {
+                    html += `
+                        <div class="result-step">
+                            <h4>✅ Step 4: Validation</h4>
+                            <div class="result-content">
+                                <div class="json-viewer">${JSON.stringify(result.step4_validation, null, 2)}</div>
                             </div>
                         </div>
                     `;
                 }
 
                 // Generate consultation summary from actual validation results
-                if (result.step3_validation) {
-                    const validationResult = result.step3_validation.result || result.step3_validation;
+                if (result.step4_validation) {
+                    const validationResult = result.step4_validation.result || result.step4_validation;
                     const approvalStatus = validationResult.approval_status;
                     const complianceScore = validationResult.compliance_score;
                     const riskLevel = validationResult.risk_level;
@@ -882,8 +1089,8 @@ Agents Used: ${result.agents_used.length}
                     
                     // Extract potential savings from AI recommendations
                     let estimatedSavings = 'N/A';
-                    if (result.step2_ai_recommendations && result.step2_ai_recommendations.consultation_response) {
-                        const aiText = result.step2_ai_recommendations.consultation_response;
+                    if (result.step3_ai_recommendations && result.step3_ai_recommendations.consultation_response) {
+                        const aiText = result.step3_ai_recommendations.consultation_response;
                         // Look for savings ranges in the AI response
                         const savingsMatch = aiText.match(/\$(\d+(?:\.\d{2})?)\s*[–-]\s*\$(\d+(?:\.\d{2})?)/);
                         if (savingsMatch) {
@@ -915,8 +1122,9 @@ Agents Used: ${result.agents_used.length}
             showTaskInfo(taskId) {
                 const taskInfo = {
                     'task1': 'Customer Data Processing: Analyzes customer inquiry, validates input data, and prepares it for AI consultation',
-                    'task2': 'Energy Consultation: Uses AI to analyze customer profile and generate personalized energy efficiency recommendations',
-                    'task3': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
+                    'task2': 'Enterprise Data Enrichment: Retrieves billing history, consumption patterns, contracts, and program eligibility from SAP ERP/CRM via AI Core Orchestration v2',
+                    'task3': 'Energy Consultation: Uses AI to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations',
+                    'task4': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
                 };
                 
                 alert(taskInfo[taskId] || 'Task information not available');
@@ -937,7 +1145,7 @@ Agents Used: ${result.agents_used.length}
             }
 
             resetTasks() {
-                ['task1', 'task2', 'task3'].forEach(taskId => {
+                ['task1', 'task2', 'task3', 'task4'].forEach(taskId => {
                     this.updateTaskStatus(taskId, 'pending');
                 });
             }
@@ -988,9 +1196,9 @@ Agents Used: ${result.agents_used.length}
             const exportData = {
                 export_timestamp: new Date().toISOString(),
                 orchestration_metadata: {
-                    demo_version: "1.0",
-                    agents_count: 3,
-                    workflow_type: "three_agent_energy_consultation"
+                    demo_version: "2.0",
+                    agents_count: 4,
+                    workflow_type: "four_agent_energy_consultation"
                 },
                 full_results: orchestrator.lastResults
             };
@@ -1006,11 +1214,346 @@ Agents Used: ${result.agents_used.length}
             linkElement.click();
         }
 
+        // Agent Details Functions
+        function showAgentDetails(agentType) {
+            const modal = document.getElementById('agentDetailsModal');
+            const content = document.getElementById('agentDetailsContent');
+            
+            const agentData = getAgentData(agentType);
+            content.innerHTML = agentData;
+            modal.style.display = 'block';
+        }
+
+        function hideAgentDetails() {
+            document.getElementById('agentDetailsModal').style.display = 'none';
+        }
+
+        function getAgentData(agentType) {
+            const agents = {
+                'n8n-customer': {
+                    name: 'n8n Customer Processor',
+                    type: 'n8n Workflow',
+                    icon: 'n8n',
+                    description: 'Processes and validates customer inquiry data using n8n workflow automation',
+                    capabilities: ['customer_processing', 'data_analysis'],
+                    endpoint: 'https://gabrielpierobon.app.n8n.cloud/webhook/931a4dbc-3fa5-432f-8c1c-a60206a46b4a',
+                    method: 'POST',
+                    requestSchema: `{
+  "task": "process energy customer inquiry",
+  "data": {
+    "customer_id": "12345",
+    "inquiry": "I want to reduce my electricity bill",
+    "home_type": "apartment",
+    "current_bill": 150
+  },
+  "timestamp": "2025-01-18T10:00:00Z",
+  "source": "multi_agent_orchestrator"
+}`,
+                    responseSchema: `[
+  {
+    "output": {
+      "customer_id": "12345",
+      "processed_inquiry": "energy efficiency consultation",
+      "customer_segment": "residential",
+      "priority_level": "medium",
+      "extracted_data": {
+        "home_type": "apartment",
+        "monthly_bill": 150,
+        "concerns": ["cost_reduction", "efficiency"]
+      },
+      "processing_timestamp": "2025-01-18T10:00:05Z"
+    }
+  }
+]`
+                },
+                'sap-ai-core': {
+                    name: 'SAP AI Core Data Enrichment',
+                    type: 'SAP AI Core Orchestration v2',
+                    icon: 'sap',
+                    description: 'Retrieves enterprise billing history, energy consumption patterns, and program eligibility from SAP ERP/CRM systems using AI Core Orchestration v2',
+                    capabilities: ['enterprise_data_enrichment', 'billing_analysis', 'eligibility_verification'],
+                    endpoint: 'https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2/lm/deployments/d12a3b4c5d6e7f8g9h0i/v2/completion',
+                    method: 'POST',
+                    headers: `Authorization: Bearer <access_token>
+AI-Resource-Group: default
+Content-Type: application/json`,
+                    requestSchema: `{
+  "orchestration_config": {
+    "module_configurations": {
+      "llm_module_config": {
+        "model_name": "gpt-4o",
+        "model_params": {
+          "max_tokens": 2000,
+          "temperature": 0.3
+        }
+      },
+      "templating_module_config": {
+        "template": [
+          {
+            "role": "system",
+            "content": "You are an SAP ERP data analyst. Retrieve and analyze customer billing and eligibility data."
+          },
+          {
+            "role": "user",
+            "content": "Retrieve complete enterprise data for customer ID {{?customer_id}}: billing history, energy consumption, active contracts, and program eligibility."
+          }
+        ]
+      },
+      "grounding_module_config": {
+        "grounding_service": "sap_erp_data_source",
+        "data_repositories": [
+          "SAP_ERP_Customer_Master",
+          "SAP_CRM_Contracts",
+          "SAP_Billing_History"
+        ],
+        "filters": {
+          "customer_id": "{{?customer_id}}"
+        }
+      }
+    }
+  },
+  "input_params": {
+    "customer_id": "12345"
+  },
+  "return_module_results": true
+}`,
+                    responseSchema: `{
+  "request_id": "sap-req-1706438405-2345",
+  "orchestration_result": {
+    "customer_id": "12345",
+    "account_status": {
+      "account_number": "SAP-12345678",
+      "account_type": "residential",
+      "status": "active",
+      "payment_standing": "excellent",
+      "account_age_months": 48
+    },
+    "billing_history": {
+      "average_monthly_bill": 152.45,
+      "last_12_months_total": 1829.40,
+      "peak_usage_month": "August",
+      "lowest_usage_month": "April",
+      "billing_trend": "increasing"
+    },
+    "energy_consumption": {
+      "average_kwh_monthly": 890,
+      "last_month_kwh": 945,
+      "usage_pattern": "seasonal_peaks",
+      "peak_demand_kw": 6.2
+    },
+    "active_contracts": [
+      {
+        "contract_id": "CNT-456789",
+        "contract_type": "standard_residential",
+        "rate_plan": "time_of_use",
+        "start_date": "2023-01-15",
+        "renewal_date": "2025-01-15"
+      }
+    ],
+    "program_eligibility": {
+      "energy_efficiency_rebate": true,
+      "smart_thermostat_program": true,
+      "solar_incentive_program": false
+    },
+    "eligibility_summary": {
+      "total_programs_eligible": 2,
+      "recommended_programs": [
+        "energy_efficiency_rebate",
+        "smart_thermostat_program"
+      ]
+    }
+  },
+  "module_results": {
+    "llm": {
+      "model": "gpt-4o",
+      "usage": {
+        "prompt_tokens": 285,
+        "completion_tokens": 198,
+        "total_tokens": 483
+      }
+    },
+    "grounding": {
+      "documents_retrieved": 5,
+      "sources": ["SAP_ERP_Customer_Master", "SAP_CRM_Contracts", "SAP_Billing_History"]
+    }
+  },
+  "processing_time_ms": 3420
+}`
+                },
+                'azure-ai': {
+                    name: 'Azure AI Energy Consultant',
+                    type: 'Azure AI Foundry Agent',
+                    icon: 'azure',
+                    description: 'Provides personalized energy efficiency recommendations using GPT-4o via Azure AI Foundry',
+                    capabilities: ['energy_consultation', 'customer_service', 'energy_efficiency'],
+                    endpoint: 'https://api.azureml.net/agents/asst_aq7lhFm8W8ldxwte9pynGlsk/threads',
+                    method: 'POST',
+                    agentId: 'asst_aq7lhFm8W8ldxwte9pynGlsk',
+                    requestSchema: `// Step 1: Create Thread
+POST /threads
+{}
+
+// Step 2: Send Message
+POST /threads/{thread_id}/messages
+{
+  "role": "user",
+  "content": "I have a customer inquiry about energy efficiency.\\n\\nCustomer Profile: {...}\\nSAP Enterprise Data: {...}\\nOriginal Inquiry: I want to reduce my electricity bill\\nHome Type: apartment\\nCurrent Monthly Bill: $150\\n\\nProvide specific energy efficiency program recommendations."
+}
+
+// Step 3: Run Agent
+POST /threads/{thread_id}/runs
+{
+  "agent_id": "asst_aq7lhFm8W8ldxwte9pynGlsk"
+}
+
+// Step 4: Poll Run Status
+GET /threads/{thread_id}/runs/{run_id}
+
+// Step 5: Get Messages
+GET /threads/{thread_id}/messages`,
+                    responseSchema: `{
+  "data": [
+    {
+      "id": "msg_abc123",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "text",
+          "text": {
+            "value": "Based on your apartment profile and current $150/month bill, I recommend:\\n\\n1. Smart Thermostat Program\\n   - Savings: $15-25/month\\n   - Installation: Free via utility rebate\\n   - Timeline: 2-3 weeks\\n\\n2. LED Lighting Upgrade\\n   - Savings: $8-12/month\\n   - Rebate: $50 available\\n   - Timeline: Immediate\\n\\n3. Energy Audit Service\\n   - Cost: Free for eligible customers\\n   - Potential savings: 10-20% reduction\\n   - Timeline: Schedule within 1 week\\n\\nTotal estimated savings: $23-37/month"
+          }
+        }
+      ],
+      "thread_id": "thread_xyz789",
+      "created_at": 1706438410
+    }
+  ]
+}`
+                },
+                'n8n-validator': {
+                    name: 'n8n Recommendation Validator',
+                    type: 'n8n Workflow',
+                    icon: 'n8n',
+                    description: 'Validates AI recommendations for compliance, accuracy, and risk assessment',
+                    capabilities: ['recommendation_validation', 'compliance_check', 'risk_assessment'],
+                    endpoint: 'https://gabrielpierobon.app.n8n.cloud/webhook/7c319881-0ba1-4cce-8c34-34d59b276569',
+                    method: 'POST',
+                    requestSchema: `{
+  "task": "validate energy efficiency recommendations",
+  "data": {
+    "customer_data": { ... },
+    "sap_enterprise_data": { ... },
+    "ai_recommendations": { ... },
+    "validation_type": "energy_efficiency_compliance",
+    "original_inquiry": { ... }
+  },
+  "timestamp": "2025-01-18T10:00:15Z",
+  "source": "multi_agent_orchestrator"
+}`,
+                    responseSchema: `[
+  {
+    "output": {
+      "validation_passed": true,
+      "approval_status": "approved",
+      "compliance_score": 92,
+      "risk_level": "low",
+      "validation_details": {
+        "regulatory_compliance": "passed",
+        "accuracy_check": "passed",
+        "customer_eligibility": "verified",
+        "cost_estimates_verified": true
+      },
+      "estimated_savings": "$23-37/month",
+      "recommendations": [
+        "All recommendations meet regulatory standards",
+        "Customer qualifies for all suggested programs",
+        "Cost estimates are within acceptable ranges"
+      ],
+      "validation_timestamp": "2025-01-18T10:00:18Z"
+    }
+  }
+]`
+                }
+            };
+
+            const agent = agents[agentType];
+            const headers = agent.headers ? `<div class="api-section">
+                    <h3>📋 Required Headers</h3>
+                    <div class="code-block">${agent.headers}</div>
+                </div>` : '';
+
+            const agentIdInfo = agent.agentId ? `<div class="info-badge type">Agent ID: ${agent.agentId}</div>` : '';
+
+            return `
+                <div class="agent-details-header">
+                    <div class="agent-icon ${agent.icon}">${agent.icon === 'n8n' ? 'n8n' : agent.icon === 'sap' ? 'SAP' : 'Azure'}</div>
+                    <div class="agent-details-title">
+                        <h2>${agent.name}</h2>
+                        <p>${agent.description}</p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div class="info-badge type">${agent.type}</div>
+                    ${agentIdInfo}
+                    ${agent.capabilities.map(cap => `<div class="info-badge capability">${cap}</div>`).join('')}
+                </div>
+
+                <div class="api-section">
+                    <h3>🌐 API Endpoint</h3>
+                    <div class="api-endpoint">
+                        <span class="method">${agent.method}</span> <span class="url">${agent.endpoint}</span>
+                    </div>
+                </div>
+
+                ${headers}
+
+                <div class="api-section">
+                    <h3>📤 Request Schema</h3>
+                    <div class="code-block">${escapeHtml(agent.requestSchema)}</div>
+                    <button class="copy-btn" onclick="copyToClipboard(\`${agent.requestSchema.replace(/`/g, '\\`')}\`, this)">📋 Copy Request</button>
+                </div>
+
+                <div class="api-section">
+                    <h3>📥 Response Schema</h3>
+                    <div class="code-block">${escapeHtml(agent.responseSchema)}</div>
+                    <button class="copy-btn" onclick="copyToClipboard(\`${agent.responseSchema.replace(/`/g, '\\`')}\`, this)">📋 Copy Response</button>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ Copied!';
+                button.style.background = '#28a745';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            });
+        }
+
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('registerModal');
-            if (event.target == modal) {
+            const registerModal = document.getElementById('registerModal');
+            const detailsModal = document.getElementById('agentDetailsModal');
+            if (event.target == registerModal) {
                 hideRegisterModal();
+            }
+            if (event.target == detailsModal) {
+                hideAgentDetails();
             }
         }
     </script>

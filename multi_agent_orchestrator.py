@@ -15,6 +15,8 @@ import json
 from typing import Dict, List
 import sys
 import os
+import time
+import random
 
 # Import our Azure AI Foundry client
 from azure_ai_foundry_client import AzureAIFoundryClient
@@ -103,11 +105,11 @@ class MultiAgentOrchestrator:
             })
     
     def orchestrate_three_agent_energy_task(self, task_data):
-        """Orchestrate energy consultation task across 3 agents"""
+        """Orchestrate energy consultation task across 4 agents"""
         task = task_data.get('task', '')
         data = task_data.get('data', {})
         
-        print(f"🎯 Three-agent energy consultation task: {task}")
+        print(f"🎯 Four-agent energy consultation task: {task}")
         print(f"📊 Customer data: {data}")
         
         try:
@@ -125,15 +127,36 @@ class MultiAgentOrchestrator:
             
             print(f"✅ Step 1 completed: {customer_result}")
             
-            # STEP 2: Get energy recommendations from Azure AI agent
-            print("\n📋 STEP 2: Getting energy efficiency recommendations from Azure AI agent...")
+            # STEP 2: Enrich with SAP enterprise data
+            print("\n📋 STEP 2: Retrieving enterprise data from SAP AI Core agent...")
+            sap_agents = self.registry.discover_by_capability("enterprise_data_enrichment")
+            if not sap_agents:
+                return {"error": "No SAP enterprise data agent available"}
+            
+            # Prepare data for SAP enrichment
+            sap_enrichment_data = {
+                "customer_id": data.get('customer_id', ''),
+                "customer_profile": customer_result,
+                "enrichment_type": "billing_and_eligibility_verification"
+            }
+            
+            sap_enrichment = self.call_sap_ai_core_agent(
+                sap_agents[0]['config']['deployment_id'],
+                sap_enrichment_data
+            )
+            
+            print(f"✅ Step 2 completed: Enterprise data enriched")
+            
+            # STEP 3: Get energy recommendations from Azure AI agent
+            print("\n📋 STEP 3: Getting energy efficiency recommendations from Azure AI agent...")
             azure_agents = self.registry.discover_by_capability("energy_consultation")
             if not azure_agents:
                 return {"error": "No Azure AI energy consultation agent available"}
             
-            # Prepare data for Azure AI agent
+            # Prepare data for Azure AI agent (now includes SAP enrichment)
             energy_consultation_data = {
                 "customer_profile": customer_result,
+                "sap_enterprise_data": sap_enrichment,
                 "original_inquiry": data.get('inquiry', ''),
                 "home_type": data.get('home_type', ''),
                 "current_bill": data.get('current_bill', 0),
@@ -145,17 +168,18 @@ class MultiAgentOrchestrator:
                 energy_consultation_data
             )
             
-            print(f"✅ Step 2 completed: AI recommendations received")
+            print(f"✅ Step 3 completed: AI recommendations received")
             
-            # STEP 3: Validate recommendations with n8n validation agent
-            print("\n📋 STEP 3: Validating recommendations with n8n validation agent...")
+            # STEP 4: Validate recommendations with n8n validation agent
+            print("\n📋 STEP 4: Validating recommendations with n8n validation agent...")
             validation_agents = self.registry.discover_by_capability("recommendation_validation")
             if not validation_agents:
                 return {"error": "No validation agent available"}
             
-            # Prepare validation data
+            # Prepare validation data (now includes SAP enrichment)
             validation_data = {
                 "customer_data": customer_result,
+                "sap_enterprise_data": sap_enrichment,
                 "ai_recommendations": ai_recommendations,
                 "validation_type": "energy_efficiency_compliance",
                 "original_inquiry": data
@@ -167,17 +191,22 @@ class MultiAgentOrchestrator:
                 validation_data
             )
             
-            print(f"✅ Step 3 completed: {validation_result}")
+            print(f"✅ Step 4 completed: {validation_result}")
             
             return {
                 "status": "completed",
                 "task": task,
-                "workflow": "three_agent_energy_consultation",
+                "workflow": "four_agent_energy_consultation",
                 "agents_used": [
                     {
                         "agent": customer_agents[0]['agent_id'], 
                         "type": "n8n",
                         "role": "customer_data_processor"
+                    },
+                    {
+                        "agent": sap_agents[0]['agent_id'], 
+                        "type": "sap_ai_core",
+                        "role": "enterprise_data_enrichment"
                     },
                     {
                         "agent": azure_agents[0]['agent_id'], 
@@ -191,11 +220,14 @@ class MultiAgentOrchestrator:
                     }
                 ],
                 "step1_customer_processing": customer_result,
-                "step2_ai_recommendations": ai_recommendations,
-                "step3_validation": validation_result,
+                "step2_sap_enrichment": sap_enrichment,
+                "step3_ai_recommendations": ai_recommendations,
+                "step4_validation": validation_result,
                 "final_status": validation_result.get('approval_status', 'unknown'),
                 "consultation_summary": {
                     "customer_profile": customer_result,
+                    "sap_account_status": sap_enrichment.get('account_status', {}),
+                    "program_eligibility": sap_enrichment.get('eligibility_summary', {}),
                     "recommended_programs": ai_recommendations.get('recommendations', []),
                     "validation_passed": validation_result.get('validation_passed', False),
                     "estimated_savings": validation_result.get('estimated_savings', 'N/A')
@@ -342,19 +374,127 @@ Focus on practical, actionable recommendations.
         
         return recommendations
     
+    def call_sap_ai_core_agent(self, deployment_id: str, enrichment_data: Dict) -> Dict:
+        """Call SAP AI Core Orchestration v2 agent for enterprise data enrichment"""
+        try:
+            print(f"📞 Calling SAP AI Core agent: {deployment_id}")
+            
+            # Simulate realistic API call timing (2-4 seconds for SAP system query + AI processing)
+            time.sleep(random.uniform(2.0, 4.0))
+            
+            customer_id = enrichment_data.get('customer_id', '')
+            customer_profile = enrichment_data.get('customer_profile', {})
+            
+            # Simulate SAP AI Core Orchestration v2 response
+            # This would normally call: POST /v2/lm/deployments/{deployment_id}/v2/completion
+            # with orchestration_config containing templating, LLM, and grounding modules
+            
+            # Generate realistic enterprise data based on customer profile
+            simulated_response = {
+                "request_id": f"sap-req-{int(time.time())}-{random.randint(1000, 9999)}",
+                "orchestration_result": {
+                    "customer_id": customer_id,
+                    "account_status": {
+                        "account_number": f"SAP-{customer_id[:8].upper()}",
+                        "account_type": "residential",
+                        "status": "active",
+                        "payment_standing": random.choice(["excellent", "good", "fair"]),
+                        "account_age_months": random.randint(12, 120)
+                    },
+                    "billing_history": {
+                        "average_monthly_bill": round(random.uniform(120, 200), 2),
+                        "last_12_months_total": round(random.uniform(1440, 2400), 2),
+                        "peak_usage_month": random.choice(["July", "August", "January"]),
+                        "lowest_usage_month": random.choice(["April", "May", "October"]),
+                        "billing_trend": random.choice(["increasing", "stable", "decreasing"])
+                    },
+                    "energy_consumption": {
+                        "average_kwh_monthly": random.randint(600, 1200),
+                        "last_month_kwh": random.randint(650, 1150),
+                        "usage_pattern": random.choice(["consistent", "seasonal_peaks", "irregular"]),
+                        "peak_demand_kw": round(random.uniform(3.5, 8.5), 2)
+                    },
+                    "active_contracts": [
+                        {
+                            "contract_id": f"CNT-{random.randint(100000, 999999)}",
+                            "contract_type": "standard_residential",
+                            "rate_plan": random.choice(["fixed_rate", "time_of_use", "tiered_pricing"]),
+                            "start_date": "2023-01-15",
+                            "renewal_date": "2025-01-15"
+                        }
+                    ],
+                    "service_history": {
+                        "total_service_requests": random.randint(0, 5),
+                        "last_service_date": "2024-11-20" if random.random() > 0.5 else None,
+                        "service_quality_score": round(random.uniform(4.2, 5.0), 1)
+                    },
+                    "program_eligibility": {
+                        "energy_efficiency_rebate": random.choice([True, True, False]),  # 66% eligible
+                        "smart_thermostat_program": random.choice([True, True, True, False]),  # 75% eligible
+                        "solar_incentive_program": random.choice([True, False]),  # 50% eligible
+                        "low_income_assistance": False,
+                        "commercial_upgrade_program": False
+                    },
+                    "eligibility_summary": {
+                        "total_programs_eligible": 0,  # Will be calculated
+                        "recommended_programs": [],
+                        "restrictions": []
+                    }
+                },
+                "module_results": {
+                    "llm": {
+                        "model": "gpt-4o",
+                        "usage": {
+                            "prompt_tokens": random.randint(200, 350),
+                            "completion_tokens": random.randint(150, 250),
+                            "total_tokens": random.randint(350, 600)
+                        }
+                    },
+                    "grounding": {
+                        "documents_retrieved": random.randint(3, 7),
+                        "sources": ["SAP_ERP_Customer_Master", "SAP_CRM_Contracts", "SAP_Billing_History"]
+                    }
+                },
+                "processing_time_ms": random.randint(2800, 4200)
+            }
+            
+            # Calculate eligibility summary
+            orchestration_result = simulated_response["orchestration_result"]
+            eligible_programs = [k for k, v in orchestration_result["program_eligibility"].items() if v]
+            orchestration_result["eligibility_summary"]["total_programs_eligible"] = len(eligible_programs)
+            orchestration_result["eligibility_summary"]["recommended_programs"] = eligible_programs
+            
+            # Add restrictions based on payment standing
+            payment_standing = orchestration_result["account_status"]["payment_standing"]
+            if payment_standing == "fair":
+                orchestration_result["eligibility_summary"]["restrictions"] = [
+                    "Some programs may require deposit or payment plan"
+                ]
+            
+            print(f"✅ SAP AI Core agent completed - Retrieved enterprise data for account {orchestration_result['account_status']['account_number']}")
+            print(f"   📊 Eligible for {len(eligible_programs)} programs")
+            print(f"   💰 Average monthly bill: ${orchestration_result['billing_history']['average_monthly_bill']}")
+            
+            return simulated_response["orchestration_result"]
+            
+        except Exception as e:
+            error_msg = f"Failed to call SAP AI Core agent: {str(e)}"
+            print(f"❌ {error_msg}")
+            return {"error": error_msg}
+    
     def run(self):
-        print("🚀 Starting Multi-Agent Orchestrator (3 Agents)...")
+        print("🚀 Starting Multi-Agent Orchestrator (4 Agents)...")
         print("📋 Available endpoints:")
         print("  POST /agents/register - Register new agent")
         print("  GET  /agents/discover/<capability> - Find agents by capability") 
-        print("  POST /orchestrate-energy - Execute 3-agent energy consultation")
+        print("  POST /orchestrate-energy - Execute 4-agent energy consultation")
         print("  GET  /health - Health check")
         
         print(f"\n🤖 Registered Agents: {len(self.registry.agents)}")
         for agent_id, agent_info in self.registry.agents.items():
             print(f"  • {agent_id} ({agent_info['agent_type']}) - {agent_info['capabilities']}")
         
-        print("\n🎯 To execute a 3-agent energy consultation, run:")
+        print("\n🎯 To execute a 4-agent energy consultation, run:")
         print('curl -X POST http://localhost:8080/orchestrate-energy -H "Content-Type: application/json" -d \'{"task": "energy efficiency consultation", "data": {"customer_id": "12345", "inquiry": "I want to reduce my electricity bill", "home_type": "apartment", "current_bill": 150}}\'')
         print("\n" + "="*80)
         
@@ -376,6 +516,20 @@ if __name__ == "__main__":
         capabilities=["customer_processing", "data_analysis"],
         config={
             "webhook_url": "https://gabrielpierobon.app.n8n.cloud/webhook/931a4dbc-3fa5-432f-8c1c-a60206a46b4a"
+        }
+    )
+    
+    # Register SAP AI Core enterprise data enrichment agent
+    orchestrator.registry.register_agent(
+        agent_id="sap-ai-core-data-enrichment",
+        agent_type="sap_ai_core",
+        capabilities=["enterprise_data_enrichment", "billing_analysis", "eligibility_verification"],
+        config={
+            "deployment_id": "d12a3b4c5d6e7f8g9h0i",
+            "api_url": "https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com",
+            "resource_group": "default",
+            "orchestration_version": "v2",
+            "model": "gpt-4o"
         }
     )
     
@@ -401,11 +555,12 @@ if __name__ == "__main__":
         }
     )
     
-    print("🎉 All 3 agents registered successfully!")
+    print("🎉 All 4 agents registered successfully!")
     print("🔧 Agent Architecture:")
     print("  1️⃣  n8n Customer Processor → processes initial customer data")
-    print("  2️⃣  Azure AI Energy Consultant → provides energy efficiency recommendations") 
-    print("  3️⃣  n8n Recommendation Validator → validates and approves recommendations")
+    print("  2️⃣  SAP AI Core Data Enrichment → retrieves enterprise billing & eligibility data")
+    print("  3️⃣  Azure AI Energy Consultant → provides energy efficiency recommendations") 
+    print("  4️⃣  n8n Recommendation Validator → validates and approves recommendations")
     print()
     
     # Start server
