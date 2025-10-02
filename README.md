@@ -2,11 +2,11 @@
 
 ## Overview
 
-This is a comprehensive demonstration of **enterprise-grade multi-agent orchestration** that showcases how AI agents from different platforms can collaborate seamlessly to accomplish complex tasks. The project demonstrates a production-ready 5-agent orchestration system with a professional Microsoft Fluent Design interface:
+This is a comprehensive demonstration of **enterprise-grade multi-agent orchestration** that showcases how AI agents from different platforms can collaborate seamlessly to accomplish complex tasks. The system demonstrates a production-ready 5-agent orchestration:
 
 1. **Basic ACP Implementation** (`acp_poc.py`) - 2-agent n8n workflow orchestration
 2. **Advanced Multi-Platform Orchestration** (`multi_agent_orchestrator.py`) - **5-agent enterprise system** combining n8n, Azure AI, SAP AI Core, and Salesforce Agentforce
-3. **Professional Frontend Demo** (`agent_orchestrator_demo.html`) - Microsoft Fluent Design UI for orchestration workflows
+3. **Frontend Demo** (`agent_orchestrator_demo.html`) - Fluent Design UI for orchestration workflows
 
 ## Why Multi-Agent Orchestration?
 
@@ -41,7 +41,7 @@ Multi-agent orchestration enables organizations to leverage specialized AI agent
 - **SAP AI Core Integration**: Orchestration v2 API for enterprise data enrichment
 - **Azure AI Integration**: Direct API communication with Azure AI Foundry agents (GPT-4o)
 - **Salesforce Agentforce**: Real-time CRM integration with Agent API
-- **Microsoft Fluent Design UI**: Professional, enterprise-ready frontend interface
+- **Fluent Design UI**: Professional, enterprise-ready frontend interface
 
 ## Features Demonstrated
 
