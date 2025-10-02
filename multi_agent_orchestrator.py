@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-Multi-Agent Orchestrator - 3 Agent System
+Multi-Agent Orchestrator - 5 Agent System
 - 2 n8n agents (customer processing & validation)
+- 1 SAP AI Core agent (enterprise data enrichment)
 - 1 Azure AI Foundry agent (energy customer service)
+- 1 Salesforce Agentforce agent (CRM service history)
 
 Usage: python multi_agent_orchestrator.py
 Then: curl -X POST http://localhost:8080/orchestrate-energy -H "Content-Type: application/json" -d '{"task": "energy efficiency consultation", "data": {"customer_id": "12345", "inquiry": "I want to reduce my electricity bill", "home_type": "apartment", "current_bill": 150}}'
@@ -20,6 +22,9 @@ import random
 
 # Import our Azure AI Foundry client
 from azure_ai_foundry_client import AzureAIFoundryClient
+
+# Import Salesforce Agent client
+from salesforce_agent_test import SalesforceAgentClient
 
 class MultiAgentRegistry:
     def __init__(self):
@@ -57,6 +62,7 @@ class MultiAgentOrchestrator:
         CORS(self.app)  # Enable CORS for all routes
         self.registry = MultiAgentRegistry()
         self.azure_ai_client = None
+        self.salesforce_client = None
         self.setup_routes()
     
     def initialize_azure_client(self):
@@ -67,6 +73,20 @@ class MultiAgentOrchestrator:
             return True
         except Exception as e:
             print(f"❌ Failed to initialize Azure AI client: {str(e)}")
+            return False
+    
+    def initialize_salesforce_client(self):
+        """Initialize Salesforce Agentforce client"""
+        try:
+            self.salesforce_client = SalesforceAgentClient()
+            if self.salesforce_client.authenticate():
+                print("✅ Salesforce Agentforce client initialized successfully")
+                return True
+            else:
+                print("⚠️  Salesforce authentication failed - agent will use fallback responses")
+                return False
+        except Exception as e:
+            print(f"⚠️  Salesforce client initialization failed: {str(e)} - using fallback")
             return False
     
     def setup_routes(self):
@@ -105,11 +125,11 @@ class MultiAgentOrchestrator:
             })
     
     def orchestrate_three_agent_energy_task(self, task_data):
-        """Orchestrate energy consultation task across 4 agents"""
+        """Orchestrate energy consultation task across 5 agents"""
         task = task_data.get('task', '')
         data = task_data.get('data', {})
         
-        print(f"🎯 Four-agent energy consultation task: {task}")
+        print(f"🎯 Five-agent energy consultation task: {task}")
         print(f"📊 Customer data: {data}")
         
         try:
@@ -170,17 +190,38 @@ class MultiAgentOrchestrator:
             
             print(f"✅ Step 3 completed: AI recommendations received")
             
-            # STEP 4: Validate recommendations with n8n validation agent
-            print("\n📋 STEP 4: Validating recommendations with n8n validation agent...")
+            # STEP 4: Check customer service history with Salesforce agent
+            print("\n📋 STEP 4: Checking customer service history with Salesforce agent...")
+            salesforce_agents = self.registry.discover_by_capability("crm_service_history")
+            if not salesforce_agents:
+                return {"error": "No Salesforce CRM agent available"}
+            
+            # Prepare data for Salesforce agent
+            salesforce_query_data = {
+                "customer_id": data.get('customer_id', ''),
+                "customer_profile": customer_result,
+                "current_inquiry": data.get('inquiry', '')
+            }
+            
+            salesforce_history = self.call_salesforce_agent(
+                salesforce_agents[0]['config']['agent_id'],
+                salesforce_query_data
+            )
+            
+            print(f"✅ Step 4 completed: Service history retrieved")
+            
+            # STEP 5: Validate recommendations with n8n validation agent
+            print("\n📋 STEP 5: Validating recommendations with n8n validation agent...")
             validation_agents = self.registry.discover_by_capability("recommendation_validation")
             if not validation_agents:
                 return {"error": "No validation agent available"}
             
-            # Prepare validation data (now includes SAP enrichment)
+            # Prepare validation data (now includes SAP enrichment and Salesforce history)
             validation_data = {
                 "customer_data": customer_result,
                 "sap_enterprise_data": sap_enrichment,
                 "ai_recommendations": ai_recommendations,
+                "salesforce_service_history": salesforce_history,
                 "validation_type": "energy_efficiency_compliance",
                 "original_inquiry": data
             }
@@ -191,12 +232,12 @@ class MultiAgentOrchestrator:
                 validation_data
             )
             
-            print(f"✅ Step 4 completed: {validation_result}")
+            print(f"✅ Step 5 completed: {validation_result}")
             
             return {
                 "status": "completed",
                 "task": task,
-                "workflow": "four_agent_energy_consultation",
+                "workflow": "five_agent_energy_consultation",
                 "agents_used": [
                     {
                         "agent": customer_agents[0]['agent_id'], 
@@ -214,6 +255,11 @@ class MultiAgentOrchestrator:
                         "role": "energy_consultant"
                     },
                     {
+                        "agent": salesforce_agents[0]['agent_id'], 
+                        "type": "salesforce_agentforce",
+                        "role": "crm_service_history"
+                    },
+                    {
                         "agent": validation_agents[0]['agent_id'], 
                         "type": "n8n",
                         "role": "recommendation_validator"
@@ -222,13 +268,15 @@ class MultiAgentOrchestrator:
                 "step1_customer_processing": customer_result,
                 "step2_sap_enrichment": sap_enrichment,
                 "step3_ai_recommendations": ai_recommendations,
-                "step4_validation": validation_result,
+                "step4_salesforce_history": salesforce_history,
+                "step5_validation": validation_result,
                 "final_status": validation_result.get('approval_status', 'unknown'),
                 "consultation_summary": {
                     "customer_profile": customer_result,
                     "sap_account_status": sap_enrichment.get('account_status', {}),
                     "program_eligibility": sap_enrichment.get('eligibility_summary', {}),
                     "recommended_programs": ai_recommendations.get('recommendations', []),
+                    "service_history_summary": salesforce_history.get('summary', 'No major service issues'),
                     "validation_passed": validation_result.get('validation_passed', False),
                     "estimated_savings": validation_result.get('estimated_savings', 'N/A')
                 }
@@ -374,6 +422,109 @@ Focus on practical, actionable recommendations.
         
         return recommendations
     
+    def call_salesforce_agent(self, agent_id: str, query_data: Dict) -> Dict:
+        """Call Salesforce Agentforce agent to check customer service history"""
+        try:
+            print(f"📞 Calling Salesforce Agentforce agent: {agent_id}")
+            
+            customer_id = query_data.get('customer_id', '')
+            current_inquiry = query_data.get('current_inquiry', '')
+            
+            # Construct the query for Salesforce
+            salesforce_query = f"Check service history for customer {customer_id}. Do they have any open cases, recent complaints, or previous inquiries related to energy efficiency or billing? Current inquiry: {current_inquiry}"
+            
+            # Make real call to Salesforce Agentforce
+            salesforce_response = {"response": ""}
+            agent_responded = False
+            
+            if self.salesforce_client:
+                try:
+                    # Start session
+                    if self.salesforce_client.start_session():
+                        # Send message
+                        response = self.salesforce_client.send_message(salesforce_query)
+                        if response and response.get('response'):
+                            salesforce_response = response
+                            agent_responded = True
+                        # End session (auto-expires)
+                        self.salesforce_client.end_session()
+                except Exception as e:
+                    print(f"⚠️  Salesforce agent call failed: {str(e)}")
+                    agent_responded = False
+            
+            # Check if agent gave a meaningful response or needs fallback
+            agent_message = salesforce_response.get('response', '').lower()
+            needs_fallback = (
+                not agent_responded or
+                "can't assist" in agent_message or
+                "cannot assist" in agent_message or
+                "can't help" in agent_message or
+                len(agent_message) < 50
+            )
+            
+            # Construct response with fallback data
+            result = {
+                "query": salesforce_query,
+                "agent_raw_response": salesforce_response.get('response', 'No response'),
+                "used_fallback": needs_fallback
+            }
+            
+            if needs_fallback:
+                # Add realistic fallback response for demo
+                result["service_history"] = {
+                    "open_cases": 0,
+                    "closed_cases_last_12_months": 2,
+                    "customer_satisfaction_score": 4.5,
+                    "last_contact_date": "2024-11-15",
+                    "previous_inquiries": [
+                        {
+                            "date": "2024-09-20",
+                            "type": "Product Inquiry",
+                            "subject": "Smart thermostat compatibility",
+                            "status": "Resolved",
+                            "resolution_time_hours": 24
+                        },
+                        {
+                            "date": "2024-06-10",
+                            "type": "Billing Question",
+                            "subject": "Summer rate plan details",
+                            "status": "Resolved",
+                            "resolution_time_hours": 4
+                        }
+                    ],
+                    "energy_program_enrollment": [
+                        "Energy Efficiency Newsletter",
+                        "Smart Home Tips Email Series"
+                    ],
+                    "customer_tier": "Standard",
+                    "account_standing": "Good"
+                }
+                result["summary"] = "Customer has positive service history with 2 successfully resolved inquiries in past year. No open cases. Previously interested in smart home energy solutions."
+                result["recommendation_notes"] = "Customer shows interest in technology-based solutions. Previous smart thermostat inquiry suggests good candidate for IoT energy programs."
+                
+                print(f"✅ Salesforce agent completed (using fallback data for demo)")
+            else:
+                # Agent gave a meaningful response
+                result["service_history"] = {
+                    "agent_response": salesforce_response.get('response', ''),
+                    "source": "salesforce_agentforce"
+                }
+                result["summary"] = salesforce_response.get('response', '')[:200]
+                result["recommendation_notes"] = "Based on Salesforce Agentforce analysis"
+                
+                print(f"✅ Salesforce agent completed with real response")
+            
+            return result
+            
+        except Exception as e:
+            error_msg = f"Failed to call Salesforce agent: {str(e)}"
+            print(f"❌ {error_msg}")
+            return {
+                "error": error_msg,
+                "used_fallback": True,
+                "summary": "Unable to retrieve service history - proceeding with consultation"
+            }
+    
     def call_sap_ai_core_agent(self, deployment_id: str, enrichment_data: Dict) -> Dict:
         """Call SAP AI Core Orchestration v2 agent for enterprise data enrichment"""
         try:
@@ -483,18 +634,18 @@ Focus on practical, actionable recommendations.
             return {"error": error_msg}
     
     def run(self):
-        print("🚀 Starting Multi-Agent Orchestrator (4 Agents)...")
+        print("🚀 Starting Multi-Agent Orchestrator (5 Agents)...")
         print("📋 Available endpoints:")
         print("  POST /agents/register - Register new agent")
         print("  GET  /agents/discover/<capability> - Find agents by capability") 
-        print("  POST /orchestrate-energy - Execute 4-agent energy consultation")
+        print("  POST /orchestrate-energy - Execute 5-agent energy consultation")
         print("  GET  /health - Health check")
         
         print(f"\n🤖 Registered Agents: {len(self.registry.agents)}")
         for agent_id, agent_info in self.registry.agents.items():
             print(f"  • {agent_id} ({agent_info['agent_type']}) - {agent_info['capabilities']}")
         
-        print("\n🎯 To execute a 4-agent energy consultation, run:")
+        print("\n🎯 To execute a 5-agent energy consultation, run:")
         print('curl -X POST http://localhost:8080/orchestrate-energy -H "Content-Type: application/json" -d \'{"task": "energy efficiency consultation", "data": {"customer_id": "12345", "inquiry": "I want to reduce my electricity bill", "home_type": "apartment", "current_bill": 150}}\'')
         print("\n" + "="*80)
         
@@ -508,6 +659,9 @@ if __name__ == "__main__":
     if not orchestrator.initialize_azure_client():
         print("❌ Cannot start without Azure AI client. Please check your configuration.")
         sys.exit(1)
+    
+    # Initialize Salesforce Agentforce client (optional - will use fallback if fails)
+    orchestrator.initialize_salesforce_client()
     
     # Register n8n customer processing agent
     orchestrator.registry.register_agent(
@@ -545,6 +699,18 @@ if __name__ == "__main__":
         }
     )
     
+    # Register Salesforce Agentforce CRM agent
+    orchestrator.registry.register_agent(
+        agent_id="salesforce-service-history",
+        agent_type="salesforce_agentforce",
+        capabilities=["crm_service_history", "case_management", "customer_insights"],
+        config={
+            "agent_id": os.getenv("SALESFORCE_AGENT_ID", "0XxKj000001I9DuKAK"),
+            "instance_url": os.getenv("SALESFORCE_INSTANCE_URL", ""),
+            "description": "Salesforce Agentforce agent for customer service history and case management"
+        }
+    )
+    
     # Register n8n validation agent
     orchestrator.registry.register_agent(
         agent_id="n8n-recommendation-validator",
@@ -555,12 +721,13 @@ if __name__ == "__main__":
         }
     )
     
-    print("🎉 All 4 agents registered successfully!")
+    print("🎉 All 5 agents registered successfully!")
     print("🔧 Agent Architecture:")
     print("  1️⃣  n8n Customer Processor → processes initial customer data")
     print("  2️⃣  SAP AI Core Data Enrichment → retrieves enterprise billing & eligibility data")
-    print("  3️⃣  Azure AI Energy Consultant → provides energy efficiency recommendations") 
-    print("  4️⃣  n8n Recommendation Validator → validates and approves recommendations")
+    print("  3️⃣  Azure AI Energy Consultant → provides energy efficiency recommendations")
+    print("  4️⃣  Salesforce Agentforce → checks customer service history & open cases")
+    print("  5️⃣  n8n Recommendation Validator → validates and approves recommendations")
     print()
     
     # Start server

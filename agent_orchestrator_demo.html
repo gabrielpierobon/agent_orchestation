@@ -155,6 +155,10 @@
             background: #0078d4;
         }
 
+        .agent-icon.salesforce {
+            background: #00a1e0;
+        }
+
         .agent-info h4 {
             margin-bottom: 5px;
             color: #333;
@@ -712,6 +716,14 @@
                         </div>
                         <span class="agent-status">Active</span>
                     </div>
+                    <div class="agent-item" onclick="showAgentDetails('salesforce')">
+                        <div class="agent-icon salesforce">SF</div>
+                        <div class="agent-info">
+                            <h4>Service History</h4>
+                            <p>Salesforce Agentforce CRM agent</p>
+                        </div>
+                        <span class="agent-status">Active</span>
+                    </div>
                     <div class="agent-item" onclick="showAgentDetails('n8n-validator')">
                         <div class="agent-icon n8n">n8n</div>
                         <div class="agent-info">
@@ -763,6 +775,16 @@
                     <div class="task-item pending" id="task4">
                         <div class="task-number">4</div>
                         <div class="task-content">
+                            <div class="task-title">Service History Check</div>
+                            <div class="task-description">Query Salesforce CRM to retrieve customer service history, open cases, previous inquiries, and account standing to inform final recommendations</div>
+                            <div class="task-agent">📞 Agent: Salesforce Agentforce</div>
+                        </div>
+                        <div class="task-status pending">Pending</div>
+                    </div>
+
+                    <div class="task-item pending" id="task5">
+                        <div class="task-number">5</div>
+                        <div class="task-content">
                             <div class="task-title">Compliance Validation</div>
                             <div class="task-description">Validate AI recommendations for compliance, accuracy, and risk assessment before final approval</div>
                             <div class="task-agent">✅ Agent: n8n Validator</div>
@@ -772,7 +794,7 @@
                 </div>
                 
                 <div class="workflow-info" id="workflowInfo">
-                    <strong>Workflow Status:</strong> <span id="workflowStatus">Ready to execute - 4 tasks pending</span>
+                    <strong>Workflow Status:</strong> <span id="workflowStatus">Ready to execute - 5 tasks pending</span>
                 </div>
             </div>
 
@@ -797,7 +819,7 @@
                         <input type="number" id="currentBill" value="150" min="0" placeholder="Enter current bill amount">
                     </div>
                     <button type="submit" class="execute-btn" id="executeBtn">
-                        🚀 Execute 4-Agent Orchestration
+                        🚀 Execute 5-Agent Orchestration
                     </button>
                 </form>
                 <div class="status-indicator idle" id="statusIndicator">
@@ -887,7 +909,7 @@
                 });
 
                 // Add click listeners to task items for info
-                ['task1', 'task2', 'task3', 'task4'].forEach(taskId => {
+                ['task1', 'task2', 'task3', 'task4', 'task5'].forEach(taskId => {
                     document.getElementById(taskId).addEventListener('click', () => {
                         this.showTaskInfo(taskId);
                     });
@@ -900,7 +922,7 @@
                     const health = await response.json();
                     
                     if (health.status === 'healthy') {
-                        this.updateWorkflowStatus('System healthy - All agents ready - 4 tasks pending');
+                        this.updateWorkflowStatus('System healthy - All agents ready - 5 tasks pending');
                     } else {
                         this.updateWorkflowStatus('System issues detected', 'error');
                     }
@@ -953,7 +975,7 @@
                     this.handleError(`Network error: ${error.message}`);
                 } finally {
                     this.isExecuting = false;
-                    this.updateExecuteButton(false, '🚀 Execute 4-Agent Orchestration');
+                    this.updateExecuteButton(false, '🚀 Execute 5-Agent Orchestration');
                 }
             }
 
@@ -978,19 +1000,26 @@
                     this.updateWorkflowStatus('Task 3: Getting AI recommendations...');
                 }, 5000);  // 2s + 3s (SAP takes 2-4s realistically)
 
-                // Task 4: Validation
+                // Task 4: Salesforce Service History
                 setTimeout(() => {
                     this.updateTaskStatus('task3', 'completed');
                     this.updateTaskStatus('task4', 'processing');
-                    this.updateWorkflowStatus('Task 4: Validating recommendations...');
+                    this.updateWorkflowStatus('Task 4: Checking customer service history...');
                 }, 8000);  // Previous + 3s for AI processing
+
+                // Task 5: Validation
+                setTimeout(() => {
+                    this.updateTaskStatus('task4', 'completed');
+                    this.updateTaskStatus('task5', 'processing');
+                    this.updateWorkflowStatus('Task 5: Validating recommendations...');
+                }, 10000);  // Previous + 2s for Salesforce
             }
 
             handleSuccess(result) {
                 this.lastResults = result; // Store full results for export
-                this.updateTaskStatus('task4', 'completed');
+                this.updateTaskStatus('task5', 'completed');
                 this.updateStatusIndicator('success', 'Orchestration completed successfully!');
-                this.updateWorkflowStatus('All tasks completed successfully - 4/4 complete');
+                this.updateWorkflowStatus('All tasks completed successfully - 5/5 complete');
                 this.displayResults(result);
             }
 
@@ -999,7 +1028,7 @@
                 this.updateWorkflowStatus('Orchestration failed', 'error');
                 
                 // Mark current processing task as error
-                ['task1', 'task2', 'task3', 'task4'].forEach(taskId => {
+                ['task1', 'task2', 'task3', 'task4', 'task5'].forEach(taskId => {
                     const task = document.getElementById(taskId);
                     if (task.classList.contains('processing')) {
                         this.updateTaskStatus(taskId, 'error');
@@ -1057,20 +1086,31 @@ Agents Used: ${result.agents_used.length}
                     `;
                 }
 
-                if (result.step4_validation) {
+                if (result.step4_salesforce_history) {
                     html += `
                         <div class="result-step">
-                            <h4>✅ Step 4: Validation</h4>
+                            <h4>📞 Step 4: Salesforce Service History</h4>
                             <div class="result-content">
-                                <div class="json-viewer">${JSON.stringify(result.step4_validation, null, 2)}</div>
+                                <div class="json-viewer">${JSON.stringify(result.step4_salesforce_history, null, 2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (result.step5_validation) {
+                    html += `
+                        <div class="result-step">
+                            <h4>✅ Step 5: Validation</h4>
+                            <div class="result-content">
+                                <div class="json-viewer">${JSON.stringify(result.step5_validation, null, 2)}</div>
                             </div>
                         </div>
                     `;
                 }
 
                 // Generate consultation summary from actual validation results
-                if (result.step4_validation) {
-                    const validationResult = result.step4_validation.result || result.step4_validation;
+                if (result.step5_validation) {
+                    const validationResult = result.step5_validation.result || result.step5_validation;
                     const approvalStatus = validationResult.approval_status;
                     const complianceScore = validationResult.compliance_score;
                     const riskLevel = validationResult.risk_level;
@@ -1124,7 +1164,8 @@ Agents Used: ${result.agents_used.length}
                     'task1': 'Customer Data Processing: Analyzes customer inquiry, validates input data, and prepares it for AI consultation',
                     'task2': 'Enterprise Data Enrichment: Retrieves billing history, consumption patterns, contracts, and program eligibility from SAP ERP/CRM via AI Core Orchestration v2',
                     'task3': 'Energy Consultation: Uses AI to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations',
-                    'task4': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
+                    'task4': 'Service History Check: Queries Salesforce CRM to retrieve customer service history, open cases, previous inquiries, and account standing',
+                    'task5': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
                 };
                 
                 alert(taskInfo[taskId] || 'Task information not available');
@@ -1145,7 +1186,7 @@ Agents Used: ${result.agents_used.length}
             }
 
             resetTasks() {
-                ['task1', 'task2', 'task3', 'task4'].forEach(taskId => {
+                ['task1', 'task2', 'task3', 'task4', 'task5'].forEach(taskId => {
                     this.updateTaskStatus(taskId, 'pending');
                 });
             }
@@ -1196,9 +1237,9 @@ Agents Used: ${result.agents_used.length}
             const exportData = {
                 export_timestamp: new Date().toISOString(),
                 orchestration_metadata: {
-                    demo_version: "2.0",
-                    agents_count: 4,
-                    workflow_type: "four_agent_energy_consultation"
+                    demo_version: "3.0",
+                    agents_count: 5,
+                    workflow_type: "five_agent_energy_consultation"
                 },
                 full_results: orchestrator.lastResults
             };
@@ -1430,6 +1471,60 @@ GET /threads/{thread_id}/messages`,
   ]
 }`
                 },
+                'salesforce': {
+                    name: 'Salesforce Agentforce Service History',
+                    type: 'Salesforce Agentforce',
+                    icon: 'salesforce',
+                    description: 'Checks customer service history, open cases, previous inquiries, and account standing from Salesforce CRM using Agentforce Agent API',
+                    capabilities: ['crm_service_history', 'case_management', 'customer_insights'],
+                    endpoint: 'https://api.salesforce.com/einstein/ai-agent/v1/agents/{AGENT_ID}/sessions',
+                    method: 'POST',
+                    agentId: '0XxKj000001I9DuKAK',
+                    requestSchema: `// Step 1: Create Session
+POST /einstein/ai-agent/v1/agents/{AGENT_ID}/sessions
+{
+  "externalSessionKey": "{RANDOM_UUID}",
+  "instanceConfig": {
+    "endpoint": "https://{MY_DOMAIN_URL}"
+  },
+  "streamingCapabilities": {
+    "chunkTypes": ["Text"]
+  },
+  "bypassUser": true
+}
+
+// Step 2: Send Message
+POST /einstein/ai-agent/v1/sessions/{SESSION_ID}/messages/stream
+{
+  "message": {
+    "type": "Text",
+    "text": "Check service history for customer {customer_id}. Do they have open cases or recent complaints related to energy efficiency?",
+    "sequenceId": 1
+  }
+}
+
+// Step 3: Session Auto-Expires (no explicit end needed)`,
+                    responseSchema: `// Session Creation Response
+{
+  "sessionId": "0199a082-831b-77d1-b025-4ec68d203bf3",
+  "_links": {
+    "self": null,
+    "messages": {
+      "href": "https://api.salesforce.com/einstein/ai-agent/v1/sessions/{SESSION_ID}/messages/stream"
+    }
+  },
+  "messages": [
+    {
+      "type": "Inform",
+      "id": "8e7cafae-0eb5-44b1-9195-21f1cd6e1f4b",
+      "message": "Hi, I'm an AI service assistant. How can I help you?"
+    }
+  ]
+}
+
+// Message Response (Server-Sent Events Stream)
+data: {"message":{"type":"Text","text":"Customer has positive service history..."}}`
+                },
                 'n8n-validator': {
                     name: 'n8n Recommendation Validator',
                     type: 'n8n Workflow',
@@ -1484,9 +1579,11 @@ GET /threads/{thread_id}/messages`,
 
             const agentIdInfo = agent.agentId ? `<div class="info-badge type">Agent ID: ${agent.agentId}</div>` : '';
 
+            const iconText = agent.icon === 'n8n' ? 'n8n' : agent.icon === 'sap' ? 'SAP' : agent.icon === 'salesforce' ? 'SF' : 'Azure';
+            
             return `
                 <div class="agent-details-header">
-                    <div class="agent-icon ${agent.icon}">${agent.icon === 'n8n' ? 'n8n' : agent.icon === 'sap' ? 'SAP' : 'Azure'}</div>
+                    <div class="agent-icon ${agent.icon}">${iconText}</div>
                     <div class="agent-details-title">
                         <h2>${agent.name}</h2>
                         <p>${agent.description}</p>
