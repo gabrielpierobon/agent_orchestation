@@ -1,4 +1,4 @@
-# Multi-Agent Orchestrator Demo
+# Multi-Agent Orchestrator
 
 ## Overview
 
