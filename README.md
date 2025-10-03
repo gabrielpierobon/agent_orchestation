@@ -43,7 +43,7 @@ Multi-agent orchestration enables organizations to leverage specialized AI agent
 - **AWS Bedrock Nova Pro**: Amazon Nova Pro via API Gateway + Lambda with async polling ⭐
 - **Azure AI Integration**: Direct API communication with Azure AI Foundry agents (GPT-4o) - Legacy
 - **Salesforce Agentforce**: Real-time CRM integration with Agent API
-- **Microsoft Fluent Design UI**: Professional, enterprise-ready frontend interface
+- **Fluent Design UI**: Professional, enterprise-ready frontend interface
 
 ## Features Demonstrated
 
