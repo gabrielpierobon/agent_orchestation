@@ -4,30 +4,31 @@
 
 This is a comprehensive demonstration of **enterprise-grade multi-agent orchestration** that showcases how AI agents from different platforms can collaborate seamlessly to accomplish complex tasks. The project demonstrates a production-ready 5-agent orchestration system with a professional Microsoft Fluent Design interface:
 
-1. **Basic ACP Implementation** (`acp_poc.py`) - 2-agent n8n workflow orchestration
-2. **Advanced Multi-Platform Orchestration** (`multi_agent_orchestrator.py`) - **5-agent enterprise system** combining n8n, Azure AI, SAP AI Core, and Salesforce Agentforce
+1. **AWS Bedrock Multi-Platform Orchestration** (`multi_agent_orchestrator_aws.py`) - **5-agent enterprise system** combining n8n, AWS Bedrock Nova Pro, SAP AI Core, and Salesforce Agentforce ⭐ **RECOMMENDED**
+2. **Azure AI Multi-Platform Orchestration** (`multi_agent_orchestrator.py`) - Legacy 5-agent system with Azure AI Foundry
 3. **Professional Frontend Demo** (`agent_orchestrator_demo.html`) - Microsoft Fluent Design UI for orchestration workflows
 
 ## Why Multi-Agent Orchestration?
 
-Multi-agent orchestration enables organizations to leverage specialized AI agents from different platforms (n8n, Azure AI Foundry, AWS Bedrock, Salesforce Agentforce, etc.) without being locked into a single vendor ecosystem. This approach provides:
+Multi-agent orchestration enables organizations to leverage specialized AI agents from different platforms (n8n, AWS Bedrock, Azure AI Foundry, Salesforce Agentforce, SAP AI Core, etc.) without being locked into a single vendor ecosystem. This approach provides:
 
 - **Platform Flexibility**: Use the best agent for each specific task
 - **Scalability**: Add new agents without restructuring existing workflows
 - **Resilience**: Distribute workloads across multiple platforms
 - **Cost Optimization**: Choose cost-effective platforms for different capabilities
+- **Multi-Cloud Strategy**: Combine AWS, Azure, and on-premise solutions
 
 ## System Architecture
 
-### 5-Agent Enterprise Energy Consultation Workflow
+### 5-Agent Enterprise Energy Consultation Workflow (AWS Bedrock)
 
 ```
 ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
-│  STEP 1: n8n    │   │ STEP 2: SAP AI  │   │ STEP 3: Azure   │   │STEP 4: Salesf.  │   │  STEP 5: n8n    │
-│   Customer      │──►│     Core        │──►│      AI         │──►│   Agentforce    │──►│   Validator     │
-│   Processor     │   │  Data Enrich.   │   │   Consultant    │   │  Service Hist.  │   │     Agent       │
+│  STEP 1: n8n    │   │ STEP 2: SAP AI  │   │ STEP 3: AWS     │   │STEP 4: Salesf.  │   │  STEP 5: n8n    │
+│   Customer      │──►│     Core        │──►│   Bedrock       │──►│   Agentforce    │──►│   Validator     │
+│   Processor     │   │  Data Enrich.   │   │  Nova Pro       │   │  Service Hist.  │   │     Agent       │
 │                 │   │                 │   │                 │   │                 │   │                 │
-│• Validation     │   │• Billing data   │   │• GPT-4 analysis │   │• CRM history    │   │• Compliance     │
+│• Validation     │   │• Billing data   │   │• Nova Pro AI    │   │• CRM history    │   │• Compliance     │
 │• Extraction     │   │• Consumption    │   │• AI recomm.     │   │• Open cases     │   │• Risk assess.   │
 │• Structuring    │   │• Eligibility    │   │• Savings calc.  │   │• Customer tier  │   │• Approval       │
 └─────────────────┘   └─────────────────┘   └─────────────────┘   └─────────────────┘   └─────────────────┘
@@ -37,21 +38,23 @@ Multi-agent orchestration enables organizations to leverage specialized AI agent
 
 - **Multi-Agent Registry**: Manages agent registration and capability discovery
 - **Orchestration Engine**: Coordinates workflows across 5 different agent platforms
-- **n8n Integration**: Webhook-based communication with n8n workflow agents
-- **SAP AI Core Integration**: Orchestration v2 API for enterprise data enrichment
-- **Azure AI Integration**: Direct API communication with Azure AI Foundry agents (GPT-4o)
+- **n8n Integration**: Webhook-based communication with n8n workflow agents (environment variable configured)
+- **SAP AI Core Integration**: Orchestration v2 API for enterprise data enrichment (simulated)
+- **AWS Bedrock Nova Pro**: Amazon Nova Pro via API Gateway + Lambda with async polling ⭐
+- **Azure AI Integration**: Direct API communication with Azure AI Foundry agents (GPT-4o) - Legacy
 - **Salesforce Agentforce**: Real-time CRM integration with Agent API
 - **Microsoft Fluent Design UI**: Professional, enterprise-ready frontend interface
 
 ## Features Demonstrated
 
 ### Core Orchestration Features
-✅ **5-Platform Integration**: n8n + SAP AI Core + Azure AI + Salesforce Agentforce  
+✅ **5-Platform Integration**: n8n + SAP AI Core + AWS Bedrock Nova Pro + Salesforce Agentforce  
 ✅ **Enterprise Workflow**: 5-step energy consultation with enterprise data enrichment  
 ✅ **Agent Registry**: Dynamic agent registration and capability-based discovery  
 ✅ **Real-time Coordination**: Live status updates across multiple platforms  
 ✅ **Error Handling**: Comprehensive error handling with graceful fallbacks  
 ✅ **OAuth2 Integration**: Client credentials flow for Salesforce authentication  
+✅ **Environment Variables**: Secure configuration via .env file (n8n webhooks, Salesforce credentials)  
 
 ### Frontend Demo Features (Microsoft Fluent Design)
 ✅ **Professional UI**: Microsoft Fluent Design System styling  
@@ -63,12 +66,14 @@ Multi-agent orchestration enables organizations to leverage specialized AI agent
 
 ### Technical Features
 ✅ **CORS Support**: Full frontend-backend integration  
-✅ **n8n Webhooks**: Bidirectional workflow agent communication  
-✅ **SAP AI Core Orchestration v2**: Templating, LLM, and grounding modules  
-✅ **Azure AI Foundry**: GPT-4o integration with conversation threads  
+✅ **n8n Webhooks**: Bidirectional workflow agent communication (env-configured)  
+✅ **SAP AI Core Orchestration v2**: Templating, LLM, and grounding modules (simulated)  
+✅ **AWS Bedrock Nova Pro**: Async invoke with polling + API Gateway architecture ⭐  
+✅ **Azure AI Foundry**: GPT-4o integration with conversation threads (legacy)  
 ✅ **Salesforce Agentforce API**: Session management with streaming responses  
 ✅ **Health Monitoring**: System health checks and agent status monitoring  
 ✅ **Fallback Mechanisms**: Graceful degradation when agents are unavailable  
+✅ **Secure Configuration**: Environment variables for all sensitive endpoints  
 
 ## Quick Start
 
@@ -76,7 +81,8 @@ Multi-agent orchestration enables organizations to leverage specialized AI agent
 
 - Python 3.8+
 - Virtual environment (recommended)
-- **Azure AI Foundry project** (for Azure AI agent integration)
+- **AWS Bedrock Nova Pro access** (API Gateway endpoint provided) ⭐ **RECOMMENDED**
+  - OR **Azure AI Foundry project** (for legacy Azure AI version)
 - **n8n instance** with webhook endpoints (for n8n agent integration)
 - **Salesforce Developer/Sandbox** account with Agentforce enabled (optional - uses fallback data if unavailable)
 - **SAP AI Core** instance (simulated in demo - no actual connection required)
@@ -109,20 +115,27 @@ pip install -r requirements.txt
 Create a `.env` file in the project root with the following configuration:
 
 ```bash
-# Azure AI Foundry (Required)
+# n8n Webhooks (Required - for both AWS and Azure versions)
+N8N_CUSTOMER_AGENT=https://your-n8n.app.n8n.cloud/webhook/your-customer-webhook-id
+N8N_VALIDATION_AGENT=https://your-n8n.app.n8n.cloud/webhook/your-validation-webhook-id
+
+# AWS Bedrock Nova Pro (for multi_agent_orchestrator_aws.py) ⭐ RECOMMENDED
+# No configuration needed - endpoint is hardcoded in aws_bedrock_nova_client.py
+# Endpoint: https://vqlrgfa4gf.execute-api.eu-central-1.amazonaws.com/prod
+
+# Azure AI Foundry (for legacy multi_agent_orchestrator.py)
 AZURE_AI_FOUNDRY_PROJECT_ENDPOINT=https://your-ai-service.services.ai.azure.com/api/projects/your-project-name
 
 # Salesforce Agentforce (Optional - uses fallback if not configured)
-SALESFORCE_CONSUMER_KEY=your_connected_app_consumer_key
-SALESFORCE_CONSUMER_SECRET=your_connected_app_consumer_secret
+SALESFORCE_CLIENT_ID=your_connected_app_client_id
+SALESFORCE_CLIENT_SECRET=your_connected_app_client_secret
 SALESFORCE_AGENT_ID=0XxKj000001I9DuKAK
 SALESFORCE_INSTANCE_URL=https://your-domain.my.salesforce.com
+SALESFORCE_USERNAME=your_username@example.com
+SALESFORCE_PASSWORD=your_password
 ```
 
-#### n8n Webhook Configuration
-Update webhook URLs in `multi_agent_orchestrator.py` with your actual n8n webhook endpoints:
-- Line 518: Customer processing webhook
-- Line 554: Validation webhook
+**Note**: All n8n webhook URLs are now configured via environment variables. The scripts will show warnings if not set and use fallback defaults.
 
 #### Salesforce Agentforce Setup (Optional)
 1. Create a Connected App in Salesforce with OAuth enabled
@@ -134,27 +147,31 @@ See `salesforce_agent_test.py` for a standalone test script.
 
 ### Running the Demo
 
-#### Option 1: Basic ACP Demo (2 agents)
+#### Option 1: AWS Bedrock Multi-Agent Demo (5 agents) ⭐ RECOMMENDED
 ```bash
-python acp_poc.py
-```
-
-#### Option 2: Enterprise Multi-Agent Demo (5 agents)
-```bash
-python multi_agent_orchestrator.py
+python multi_agent_orchestrator_aws.py
 ```
 
 This starts the full 5-agent orchestration system with:
 - n8n Customer Processor
 - SAP AI Core Data Enrichment
-- Azure AI Energy Consultant
+- **AWS Bedrock Nova Pro Energy Consultant** ⭐
 - Salesforce Agentforce Service History
 - n8n Recommendation Validator
+
+#### Option 2: Azure AI Multi-Agent Demo (5 agents - Legacy)
+```bash
+python multi_agent_orchestrator.py
+```
+
+Legacy version using Azure AI Foundry instead of AWS Bedrock.
 
 #### Option 3: Interactive Frontend Demo (Recommended)
 1. Start the orchestrator server:
 ```bash
-python multi_agent_orchestrator.py
+python multi_agent_orchestrator_aws.py  # AWS version (recommended)
+# OR
+python multi_agent_orchestrator.py      # Azure version (legacy)
 ```
 
 2. Open `agent_orchestrator_demo.html` in your browser
@@ -172,32 +189,7 @@ Tests direct communication with Salesforce Agentforce agent.
 
 ## API Endpoints
 
-### Basic ACP Server (`acp_poc.py`)
-
-#### Register Agent
-```bash
-POST /agents/register
-Content-Type: application/json
-
-{
-  "agent_id": "my-agent",
-  "capabilities": ["data_processing", "analysis"],
-  "webhook_url": "https://my-agent.com/webhook"
-}
-```
-
-#### Multi-Agent Orchestration
-```bash
-POST /orchestrate-multi
-Content-Type: application/json
-
-{
-  "task": "process and validate customer data",
-  "data": {"customer_id": "12345"}
-}
-```
-
-### Advanced Multi-Agent Server (`multi_agent_orchestrator.py`)
+### Multi-Agent Server (`multi_agent_orchestrator_aws.py` / `multi_agent_orchestrator.py`)
 
 #### Register Multi-Platform Agent
 ```bash
@@ -205,12 +197,14 @@ POST /agents/register
 Content-Type: application/json
 
 {
-  "agent_id": "azure-ai-consultant",
-  "agent_type": "azure_ai",
+  "agent_id": "aws-bedrock-nova-pro-energy",
+  "agent_type": "aws_bedrock_nova_pro",
   "capabilities": ["energy_consultation", "customer_service"],
   "config": {
-    "agent_id": "asst_aq7lhFm8W8ldxwte9pynGlsk",
-    "model": "gpt-4o"
+    "agent_id": "aws-bedrock-nova-pro-energy",
+    "model": "amazon.nova-pro-v1:0",
+    "endpoint_url": "https://vqlrgfa4gf.execute-api.eu-central-1.amazonaws.com/prod",
+    "system_prompt": "You are a helpful customer service agent for an energy company."
   }
 }
 ```
@@ -238,8 +232,8 @@ GET /health
 # Response
 {
   "status": "healthy",
-  "agents_registered": 3,
-  "azure_ai_ready": true
+  "agents_registered": 5,
+  "aws_bedrock_ready": true
 }
 ```
 
@@ -276,11 +270,11 @@ curl -X POST http://localhost:8080/orchestrate-energy \
    - Checks program eligibility in SAP CRM
    - Uses Orchestration v2 with templating and grounding modules
 
-3. **Step 3**: Azure AI Energy Consultant (GPT-4o)
-   - Analyzes customer profile + SAP enterprise data
+3. **Step 3**: AWS Bedrock Nova Pro Energy Consultant
+   - Analyzes customer profile + SAP enterprise data using Amazon Nova Pro
    - Generates personalized energy efficiency recommendations
    - Estimates potential savings based on real billing data
-   - Creates conversation thread for context retention
+   - Async invocation with polling for response
 
 4. **Step 4**: Salesforce Agentforce Service History
    - Queries CRM for customer service history
@@ -326,29 +320,31 @@ curl -X POST http://localhost:8080/orchestrate-energy \
 
 ```
 agent_orchestation/
-├── README.md                           # This comprehensive documentation
-├── requirements.txt                    # Python dependencies
-├── .env                               # Environment variables (create this)
+├── README.md                             # This comprehensive documentation
+├── requirements.txt                      # Python dependencies
+├── .env                                 # Environment variables (create this)
 │
-├── acp_poc.py                         # Basic 2-agent ACP implementation
-├── multi_agent_orchestrator.py       # ⭐ 5-agent enterprise orchestrator
-├── azure_ai_foundry_client.py        # Azure AI Foundry integration
-├── salesforce_agent_test.py          # ⭐ Salesforce Agentforce test client
-├── agent_orchestrator_demo.html      # ⭐ Microsoft Fluent Design UI
+├── multi_agent_orchestrator_aws.py     # ⭐ 5-agent AWS Bedrock orchestrator (RECOMMENDED)
+├── multi_agent_orchestrator.py         # 5-agent Azure AI orchestrator (legacy)
+├── azure_ai_foundry_client.py          # Azure AI Foundry integration (legacy)
+├── salesforce_agent_test.py            # Salesforce Agentforce test client
+├── agent_orchestrator_demo.html        # ⭐ Microsoft Fluent Design UI
 │
-├── FRAMEWORK_GOBIERNO_AGENTES.md     # Agent governance framework (Spanish)
-└── venv/                              # Virtual environment (created by you)
+├── FRAMEWORK_GOBIERNO_AGENTES.md       # Agent governance framework (Spanish)
+└── venv/                                # Virtual environment (created by you)
 ```
 
 ## Key Technologies
 
 ### Backend Technologies
 - **Python Flask**: Web server and REST API endpoints
-- **Azure AI Foundry**: GPT-4o powered energy consultation with conversation threads
+- **AWS Bedrock Nova Pro**: Amazon Nova Pro v1:0 via API Gateway + Lambda with async polling ⭐
+- **Azure AI Foundry**: GPT-4o powered energy consultation with conversation threads (legacy)
 - **SAP AI Core Orchestration v2**: Templating, LLM, and grounding modules (simulated)
 - **Salesforce Agentforce API**: Real-time CRM integration with OAuth2 + streaming
-- **n8n Integration**: Webhook-based workflow agents
+- **n8n Integration**: Webhook-based workflow agents (environment variable configured)
 - **CORS Support**: Full cross-origin resource sharing
+- **Environment Variables**: Secure configuration with python-dotenv
 
 ### Frontend Technologies  
 - **Microsoft Fluent Design**: Professional enterprise UI system
@@ -359,24 +355,25 @@ agent_orchestation/
 - **VS Code Themes**: Professional code block styling
 
 ### Integration Patterns
-- **Webhook Communication**: Bidirectional n8n integration
-- **REST APIs**: Azure AI, SAP AI Core, Salesforce Agentforce
+- **Webhook Communication**: Bidirectional n8n integration (env-configured)
+- **REST APIs**: AWS Bedrock, Azure AI, SAP AI Core, Salesforce Agentforce
+- **Async + Polling**: AWS Bedrock Nova Pro async invocation pattern
 - **OAuth2 Client Credentials**: Secure Salesforce authentication
 - **Server-Sent Events**: Salesforce streaming response handling
 - **Sequential Orchestration**: 5-step enterprise workflow
 - **Fallback Mechanisms**: Graceful degradation when services unavailable
 - **Error Handling**: Comprehensive error recovery and user feedback
+- **Environment Variables**: Secure configuration management
 
 ## Development Roadmap
 
 ### Phase 1: Foundation ✅ (Completed)
-- [x] Basic ACP server implementation (`acp_poc.py`)
 - [x] Agent registry and discovery
-- [x] Multi-agent orchestration (2-agent workflow)
+- [x] Multi-agent orchestration system
 - [x] n8n webhook integration
 
 ### Phase 2: Advanced Multi-Platform ✅ (Completed)
-- [x] 3-agent orchestration system
+- [x] 5-agent orchestration system
 - [x] Azure AI Foundry integration with GPT-4o
 - [x] Interactive frontend demo
 - [x] Real-time progress tracking and visualization
@@ -394,27 +391,45 @@ agent_orchestation/
 - [x] Fallback mechanisms for unavailable services
 - [x] Professional enterprise-grade interface
 
-### Phase 4: Production Readiness 🚧 (Future)
-- [ ] AWS Bedrock AgentCore wrapper
+### Phase 4: AWS Bedrock Integration ✅ (Completed)
+- [x] **AWS Bedrock Nova Pro integration** ⭐
+- [x] **Async invocation with polling pattern**
+- [x] **API Gateway + Lambda architecture**
+- [x] **Environment variable configuration for n8n webhooks**
+- [x] **Migration from Azure AI to AWS Bedrock**
+- [x] **Updated frontend for AWS Bedrock**
+
+### Phase 5: Production Readiness 🚧 (Future)
 - [ ] Microsoft Copilot Studio integration
 - [ ] Authentication and role-based access control
 - [ ] Agent health monitoring dashboard
 - [ ] Performance metrics and analytics
 - [ ] Load balancing and horizontal scaling
 - [ ] Audit logging and compliance reporting
+- [ ] Multi-region deployment
 
 ## Configuration
 
 ### Environment Variables (.env file)
 ```bash
-# Azure AI Foundry Configuration (Required)
+# n8n Webhooks (Required - for both AWS and Azure versions)
+N8N_CUSTOMER_AGENT=https://your-n8n.app.n8n.cloud/webhook/your-customer-webhook-id
+N8N_VALIDATION_AGENT=https://your-n8n.app.n8n.cloud/webhook/your-validation-webhook-id
+
+# AWS Bedrock Nova Pro (for multi_agent_orchestrator_aws.py) ⭐ RECOMMENDED
+# No configuration needed - endpoint is hardcoded
+# Endpoint: https://vqlrgfa4gf.execute-api.eu-central-1.amazonaws.com/prod
+
+# Azure AI Foundry (for legacy multi_agent_orchestrator.py)
 AZURE_AI_FOUNDRY_PROJECT_ENDPOINT=https://your-ai-service.services.ai.azure.com/api/projects/your-project-name
 
 # Salesforce Agentforce Configuration (Optional - uses fallback if not provided)
-SALESFORCE_CONSUMER_KEY=your_connected_app_consumer_key
-SALESFORCE_CONSUMER_SECRET=your_connected_app_consumer_secret
+SALESFORCE_CLIENT_ID=your_connected_app_client_id
+SALESFORCE_CLIENT_SECRET=your_connected_app_client_secret
 SALESFORCE_AGENT_ID=0XxKj000001I9DuKAK
 SALESFORCE_INSTANCE_URL=https://your-domain.my.salesforce.com
+SALESFORCE_USERNAME=your_username@example.com
+SALESFORCE_PASSWORD=your_password
 
 # Azure Authentication (Optional - uses DefaultAzureCredential by default)
 AZURE_CLIENT_ID=your-client-id
@@ -427,20 +442,7 @@ FLASK_PORT=8080
 FLASK_DEBUG=true
 ```
 
-### Agent Configuration
-Update webhook URLs and agent IDs in the orchestrator files:
-
-**multi_agent_orchestrator.py:**
-```python
-# n8n Customer Processor
-webhook_url="https://your-n8n-instance.com/webhook/customer-processor"
-
-# Azure AI Agent
-agent_id="asst_your_agent_id"
-
-# n8n Validator
-webhook_url="https://your-n8n-instance.com/webhook/validator"
-```
+**Note**: All n8n webhook URLs and Salesforce credentials are now configured via environment variables. The scripts will show warnings if not set and use fallback defaults.
 
 ### Dependencies (requirements.txt)
 ```
@@ -455,7 +457,9 @@ python-dotenv==1.0.0
 **Note**: The system includes graceful fallbacks, so:
 - SAP AI Core integration is simulated (no actual connection required)
 - Salesforce Agentforce uses fallback data if not configured
-- Only Azure AI Foundry and n8n are strictly required for core functionality
+- n8n webhooks use defaults if environment variables not set
+- AWS Bedrock endpoint is pre-configured (recommended version)
+- Only n8n webhooks are required for basic functionality
 
 ## Troubleshooting
 
@@ -563,11 +567,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
    - Eligible for 2 programs: energy_efficiency_rebate, smart_thermostat_program
    - Processing time: 2.8s
 
-3. **Step 3 - Azure AI Consultation (GPT-4o)**:
-   - Generated 5 personalized programs
+3. **Step 3 - AWS Bedrock Nova Pro Consultation**:
+   - Generated 5 personalized programs using Amazon Nova Pro
    - Estimated savings: $23-$37/month
    - Implementation timeline provided
-   - Processing time: 4.2s
+   - Processing time: 5-15s (async with polling)
 
 4. **Step 4 - Salesforce Service History**:
    - 0 open cases, 2 closed cases last 12 months
@@ -581,13 +585,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
    - Risk level: Low
    - Processing time: <1s
 
-**Total Orchestration Time**: ~10 seconds  
-**Frontend**: Microsoft Fluent Design with professional animations
+**Total Orchestration Time**: ~15-20 seconds (with AWS Bedrock async polling)  
+**Frontend**: Microsoft Fluent Design with professional animations  
+**AI Model**: Amazon Nova Pro v1:0 (via AWS Bedrock)
 
 ## References
 
 ### Platform Documentation
-- [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-studio/)
+- [AWS Bedrock Nova Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/models-nova.html) ⭐
+- [AWS Bedrock InvokeModel API](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModel.html)
+- [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-studio/) (Legacy)
 - [SAP AI Core Orchestration v2](https://help.sap.com/docs/ai-core/sap-ai-core-service-guide/orchestration)
 - [Salesforce Agentforce Agent API](https://developer.salesforce.com/docs/einstein/genai-api/guide/agent-api.html)
 - [n8n Webhook Integration Guide](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
@@ -606,4 +613,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **Built with ❤️ for demonstrating the future of enterprise multi-platform AI agent orchestration**
 
-*Showcasing 5 agents across n8n, SAP AI Core, Azure AI Foundry, and Salesforce Agentforce platforms*
+*Showcasing 5 agents across n8n, SAP AI Core, AWS Bedrock Nova Pro, and Salesforce Agentforce platforms* ⭐
+
+**Latest Update**: Migrated from Azure AI Foundry to AWS Bedrock Nova Pro for improved performance and cost optimization
