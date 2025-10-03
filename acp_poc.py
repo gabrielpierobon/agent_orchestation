@@ -222,21 +222,37 @@ class ACPServer:
         self.app.run(host='0.0.0.0', port=8080, debug=True)
 
 if __name__ == "__main__":
+    import os
+    from dotenv import load_dotenv
+    
+    # Load environment variables
+    load_dotenv()
+    
     # Initialize and start ACP server
     server = ACPServer()
     
-    # Auto-register first n8n agent (replace with your actual webhook URL)
+    # Auto-register first n8n agent (from environment variable)
+    n8n_customer_url = os.getenv("N8N_CUSTOMER_AGENT")
+    if not n8n_customer_url:
+        print("⚠️  Warning: N8N_CUSTOMER_AGENT environment variable not set")
+        n8n_customer_url = "https://gabrielpierobon.app.n8n.cloud/webhook/931a4dbc-3fa5-432f-8c1c-a60206a46b4a"
+    
     server.registry.register_agent(
         agent_id="n8n-customer-agent",
         capabilities=["customer_processing", "data_analysis"],
-        webhook_url="https://gabrielpierobon.app.n8n.cloud/webhook/931a4dbc-3fa5-432f-8c1c-a60206a46b4a"
+        webhook_url=n8n_customer_url
     )
     
-    # Auto-register second n8n agent (replace with your actual webhook URL)
+    # Auto-register second n8n agent (from environment variable)
+    n8n_validation_url = os.getenv("N8N_VALIDATION_AGENT")
+    if not n8n_validation_url:
+        print("⚠️  Warning: N8N_VALIDATION_AGENT environment variable not set")
+        n8n_validation_url = "https://gabrielpierobon.app.n8n.cloud/webhook/7c319881-0ba1-4cce-8c34-34d59b276569"
+    
     server.registry.register_agent(
         agent_id="n8n-validation-agent",
         capabilities=["data_validation", "compliance_check", "risk_assessment"],
-        webhook_url="https://gabrielpierobon.app.n8n.cloud/webhook/7c319881-0ba1-4cce-8c34-34d59b276569"  # Replace with your second agent URL
+        webhook_url=n8n_validation_url
     )
     
     # Start server

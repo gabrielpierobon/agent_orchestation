@@ -661,12 +661,17 @@ if __name__ == "__main__":
     orchestrator.initialize_salesforce_client()
     
     # Register n8n customer processing agent
+    n8n_customer_url = os.getenv("N8N_CUSTOMER_AGENT")
+    if not n8n_customer_url:
+        print("⚠️  Warning: N8N_CUSTOMER_AGENT environment variable not set")
+        n8n_customer_url = "https://gabrielpierobon.app.n8n.cloud/webhook/931a4dbc-3fa5-432f-8c1c-a60206a46b4a"
+    
     orchestrator.registry.register_agent(
         agent_id="n8n-customer-processor",
         agent_type="n8n",
         capabilities=["customer_processing", "data_analysis"],
         config={
-            "webhook_url": "https://gabrielpierobon.app.n8n.cloud/webhook/931a4dbc-3fa5-432f-8c1c-a60206a46b4a"
+            "webhook_url": n8n_customer_url
         }
     )
     
@@ -710,12 +715,17 @@ if __name__ == "__main__":
     )
     
     # Register n8n validation agent
+    n8n_validation_url = os.getenv("N8N_VALIDATION_AGENT")
+    if not n8n_validation_url:
+        print("⚠️  Warning: N8N_VALIDATION_AGENT environment variable not set")
+        n8n_validation_url = "https://gabrielpierobon.app.n8n.cloud/webhook/7c319881-0ba1-4cce-8c34-34d59b276569"
+    
     orchestrator.registry.register_agent(
         agent_id="n8n-recommendation-validator",
         agent_type="n8n",
         capabilities=["recommendation_validation", "compliance_check", "risk_assessment"],
         config={
-            "webhook_url": "https://gabrielpierobon.app.n8n.cloud/webhook/7c319881-0ba1-4cce-8c34-34d59b276569"
+            "webhook_url": n8n_validation_url
         }
     )
     
