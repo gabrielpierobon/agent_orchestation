@@ -253,8 +253,8 @@
             background: linear-gradient(135deg, #0a6ed1 0%, #0053b5 100%);
         }
 
-        .agent-icon.azure {
-            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+        .agent-icon.aws {
+            background: linear-gradient(135deg, #FF9900 0%, #EC7211 100%);
         }
 
         .agent-icon.salesforce {
@@ -962,11 +962,11 @@
                         </div>
                         <span class="agent-status">Active</span>
                     </div>
-                    <div class="agent-item" onclick="showAgentDetails('azure-ai')">
-                        <div class="agent-icon azure">Azure</div>
+                    <div class="agent-item" onclick="showAgentDetails('aws-bedrock')">
+                        <div class="agent-icon aws">AWS</div>
                         <div class="agent-info">
                             <h4>Energy Consultant</h4>
-                            <p>AI-powered recommendations agent</p>
+                            <p>AWS Bedrock Nova Pro AI agent</p>
                         </div>
                         <span class="agent-status">Active</span>
                     </div>
@@ -1020,8 +1020,8 @@
                         <div class="task-number">3</div>
                         <div class="task-content">
                             <div class="task-title">Energy Consultation Analysis</div>
-                            <div class="task-description">Use GPT-4 to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations with savings potential</div>
-                            <div class="task-agent">🤖 Agent: Azure AI Energy Consultant</div>
+                            <div class="task-description">Use AWS Bedrock Nova Pro to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations with savings potential</div>
+                            <div class="task-agent">🤖 Agent: AWS Bedrock Nova Pro Energy Consultant</div>
                         </div>
                         <div class="task-status pending">Pending</div>
                     </div>
@@ -1113,7 +1113,9 @@
                     <select id="agentType" required>
                         <option value="">Select Type</option>
                         <option value="n8n">n8n Workflow</option>
-                        <option value="azure_ai">Azure AI Agent</option>
+                        <option value="aws_bedrock_nova_pro">AWS Bedrock Nova Pro</option>
+                        <option value="sap_ai_core">SAP AI Core</option>
+                        <option value="salesforce_agentforce">Salesforce Agentforce</option>
                         <option value="custom">Custom API</option>
                     </select>
                 </div>
@@ -1247,11 +1249,11 @@
                     this.updateWorkflowStatus('Task 2: Retrieving enterprise data from SAP AI Core...');
                 }, 2000);
 
-                // Task 3: Azure AI Consultation
+                // Task 3: AWS Bedrock Nova Pro Consultation
                 setTimeout(() => {
                     this.updateTaskStatus('task2', 'completed');
                     this.updateTaskStatus('task3', 'processing');
-                    this.updateWorkflowStatus('Task 3: Getting AI recommendations...');
+                    this.updateWorkflowStatus('Task 3: Getting AI recommendations from AWS Bedrock Nova Pro...');
                 }, 5000);  // 2s + 3s (SAP takes 2-4s realistically)
 
                 // Task 4: Salesforce Service History
@@ -1414,13 +1416,13 @@ Agents Used: ${result.agents_used.length}
             }
 
             showTaskInfo(taskId) {
-                const taskInfo = {
-                    'task1': 'Customer Data Processing: Analyzes customer inquiry, validates input data, and prepares it for AI consultation',
-                    'task2': 'Enterprise Data Enrichment: Retrieves billing history, consumption patterns, contracts, and program eligibility from SAP ERP/CRM via AI Core Orchestration v2',
-                    'task3': 'Energy Consultation: Uses AI to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations',
-                    'task4': 'Service History Check: Queries Salesforce CRM to retrieve customer service history, open cases, previous inquiries, and account standing',
-                    'task5': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
-                };
+            const taskInfo = {
+                'task1': 'Customer Data Processing: Analyzes customer inquiry, validates input data, and prepares it for AI consultation',
+                'task2': 'Enterprise Data Enrichment: Retrieves billing history, consumption patterns, contracts, and program eligibility from SAP ERP/CRM via AI Core Orchestration v2',
+                'task3': 'Energy Consultation: Uses AWS Bedrock Nova Pro to analyze customer profile and SAP enterprise data to generate personalized energy efficiency recommendations',
+                'task4': 'Service History Check: Queries Salesforce CRM to retrieve customer service history, open cases, previous inquiries, and account standing',
+                'task5': 'Compliance Validation: Validates AI recommendations for compliance, accuracy, and risk assessment'
+            };
                 
                 alert(taskInfo[taskId] || 'Task information not available');
             }
@@ -1675,55 +1677,54 @@ Content-Type: application/json`,
   "processing_time_ms": 3420
 }`
                 },
-                'azure-ai': {
-                    name: 'Azure AI Energy Consultant',
-                    type: 'Azure AI Foundry Agent',
-                    icon: 'azure',
-                    description: 'Provides personalized energy efficiency recommendations using GPT-4o via Azure AI Foundry',
+                'aws-bedrock': {
+                    name: 'AWS Bedrock Nova Pro Energy Consultant',
+                    type: 'AWS Bedrock Nova Pro',
+                    icon: 'aws',
+                    description: 'Provides personalized energy efficiency recommendations using Amazon Nova Pro via AWS Bedrock',
                     capabilities: ['energy_consultation', 'customer_service', 'energy_efficiency'],
-                    endpoint: 'https://api.azureml.net/agents/asst_aq7lhFm8W8ldxwte9pynGlsk/threads',
+                    endpoint: 'https://vqlrgfa4gf.execute-api.eu-central-1.amazonaws.com/prod/message',
                     method: 'POST',
-                    agentId: 'asst_aq7lhFm8W8ldxwte9pynGlsk',
-                    requestSchema: `// Step 1: Create Thread
-POST /threads
-{}
-
-// Step 2: Send Message
-POST /threads/{thread_id}/messages
+                    agentId: 'aws-bedrock-nova-pro-energy',
+                    modelId: 'eu.amazon.nova-pro-v1:0',
+                    requestSchema: `// Step 1: Send Message (Async)
+POST /message
 {
   "role": "user",
-  "content": "I have a customer inquiry about energy efficiency.\\n\\nCustomer Profile: {...}\\nSAP Enterprise Data: {...}\\nOriginal Inquiry: I want to reduce my electricity bill\\nHome Type: apartment\\nCurrent Monthly Bill: $150\\n\\nProvide specific energy efficiency program recommendations."
+  "message": "I have a customer inquiry about energy efficiency.\\n\\nCustomer Profile: {...}\\nSAP Enterprise Data: {...}\\nOriginal Inquiry: I want to reduce my electricity bill\\nHome Type: apartment\\nCurrent Monthly Bill: $150\\n\\nProvide specific energy efficiency program recommendations."
 }
 
-// Step 3: Run Agent
-POST /threads/{thread_id}/runs
+// Response (immediate):
 {
-  "agent_id": "asst_aq7lhFm8W8ldxwte9pynGlsk"
+  "statusCode": 200,
+  "body": "{\\"threadId\\":\\"thread-abc123\\",\\"status\\":\\"processing\\",\\"message\\":\\"Message queued for processing\\"}"
 }
 
-// Step 4: Poll Run Status
-GET /threads/{thread_id}/runs/{run_id}
+// Step 2: Poll Status (until completed)
+GET /status?threadId={threadId}
 
-// Step 5: Get Messages
-GET /threads/{thread_id}/messages`,
-                    responseSchema: `{
-  "data": [
-    {
-      "id": "msg_abc123",
-      "role": "assistant",
-      "content": [
-        {
-          "type": "text",
-          "text": {
-            "value": "Based on your apartment profile and current $150/month bill, I recommend:\\n\\n1. Smart Thermostat Program\\n   - Savings: $15-25/month\\n   - Installation: Free via utility rebate\\n   - Timeline: 2-3 weeks\\n\\n2. LED Lighting Upgrade\\n   - Savings: $8-12/month\\n   - Rebate: $50 available\\n   - Timeline: Immediate\\n\\n3. Energy Audit Service\\n   - Cost: Free for eligible customers\\n   - Potential savings: 10-20% reduction\\n   - Timeline: Schedule within 1 week\\n\\nTotal estimated savings: $23-37/month"
-          }
-        }
-      ],
-      "thread_id": "thread_xyz789",
-      "created_at": 1706438410
-    }
-  ]
-}`
+// Response (when completed):
+{
+  "statusCode": 200,
+  "body": "{\\"threadId\\":\\"thread-abc123\\",\\"status\\":\\"completed\\",\\"response\\":\\"Based on your apartment...\\",\\"message\\":\\"Message processed by Nova Pro model\\"}"
+}`,
+                    responseSchema: `// Final Response (from status endpoint when completed)
+{
+  "statusCode": 200,
+  "body": "{
+    \\"threadId\\": \\"thread-abc123\\",
+    \\"status\\": \\"completed\\",
+    \\"response\\": \\"Based on your apartment profile and current $150/month bill, I recommend:\\\\n\\\\n1. Smart Thermostat Program\\\\n   - Savings: $15-25/month\\\\n   - Installation: Free via utility rebate\\\\n   - Timeline: 2-3 weeks\\\\n\\\\n2. LED Lighting Upgrade\\\\n   - Savings: $8-12/month\\\\n   - Rebate: $50 available\\\\n   - Timeline: Immediate\\\\n\\\\n3. Energy Audit Service\\\\n   - Cost: Free for eligible customers\\\\n   - Potential savings: 10-20% reduction\\\\n   - Timeline: Schedule within 1 week\\\\n\\\\nTotal estimated savings: $23-37/month\\",
+    \\"message\\": \\"Message processed by Nova Pro model\\"
+  }"
+}
+
+// Technical Details:
+// - Model: amazon.nova-pro-v1:0 (EU inference profile: eu.amazon.nova-pro-v1:0)
+// - Region: eu-central-1
+// - Architecture: API Gateway → Lambda → Bedrock
+// - Processing: Async with polling (typical: 5-30 seconds)
+// - System Prompt: Configured in Lambda function`
                 },
                 'salesforce': {
                     name: 'Salesforce Agentforce Service History',
@@ -1833,7 +1834,7 @@ data: {"message":{"type":"Text","text":"Customer has positive service history...
 
             const agentIdInfo = agent.agentId ? `<div class="info-badge type">Agent ID: ${agent.agentId}</div>` : '';
 
-            const iconText = agent.icon === 'n8n' ? 'n8n' : agent.icon === 'sap' ? 'SAP' : agent.icon === 'salesforce' ? 'SF' : 'Azure';
+            const iconText = agent.icon === 'n8n' ? 'n8n' : agent.icon === 'sap' ? 'SAP' : agent.icon === 'salesforce' ? 'SF' : agent.icon === 'aws' ? 'AWS' : 'Agent';
             
             return `
                 <div class="agent-details-header">
